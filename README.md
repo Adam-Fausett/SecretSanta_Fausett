@@ -1,4 +1,4 @@
-# SecredSanta_Fausett
+# SecretSanta_Fausett
 Secret Santa!
 This is a simple web application for choosing names for a Secret Santa gift exchange.
 The applicatin provides support for both individual participants as well as the ability to define groups of participants that should be prevented from selecting each other (i.e., prevent family members from selecting fellow family members, etc.)
