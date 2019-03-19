@@ -1,0 +1,132 @@
+﻿*,
+*:before,
+*:after {
+    box-sizing: border-box;
+}
+
+body {
+    padding-top: 65px;
+}
+
+@media (max-width: 768px) {
+}
+
+body.modal-open,
+.modal-open .navbar-fixed-top {
+    margin-right: 0px !important;
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.body-content {
+    /* 100vh - header height */
+    min-height: calc(100vh - 65px);
+    /*width: 100%;*/
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-flow: column;
+    -ms-flex-flow: column;
+    flex-flow: column;
+    -ms-justify-content: space-between;
+    -webkit-justify-content: space-between;
+    justify-content: space-between;
+}
+
+    .body-content .content {
+        -webkit-box-flex: 1;
+        -webkit-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+    }
+
+    .body-content footer {
+        padding-top: 10px;
+        font-size: 2vmin;
+    }
+
+.modal {
+    overflow: hidden;
+}
+
+.clear {
+    clear: both;
+}
+
+.logo {
+    margin-bottom: 15px;
+}
+
+/*#region Disabled*/
+[disabled] {
+    cursor: not-allowed;
+}
+
+button[disabled] {
+    cursor: not-allowed;
+    pointer-events: all !important;
+}
+/*#endregion*/
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.glyphicon.fast-right-spinner {
+    -webkit-animation: glyphicon-spin-r 1s infinite linear;
+    animation: glyphicon-spin-r 1s infinite linear;
+    position: relative;
+    top: 3px;
+}
+
+@-webkit-keyframes glyphicon-spin-r {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes glyphicon-spin-r {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
+
+/*#endregion*/
+
+/*#region Error Summary*/
+.error-summary {
+    position: fixed;
+    left: 1em;
+    right: 1em;
+    bottom: 1em;
+    z-index: 12000;
+    pointer-events: none;
+}
+
+    .error-summary .alert {
+        margin-bottom: 10px !important;
+        pointer-events: auto;
+    }
+/*#endregion*/

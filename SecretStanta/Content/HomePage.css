@@ -1,0 +1,65 @@
+﻿.description {
+    padding-top: 30px;
+}
+
+.row.groups fieldset {
+    position: relative;
+}
+
+    .row.groups fieldset legend {
+        border-bottom: none;
+    }
+
+        .row.groups fieldset legend ~ .btn-close {
+            cursor: pointer;
+            position: absolute;
+            top: -10px;
+            right: -4px;
+        }
+
+.groups [class^="col-"] {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.group {
+    padding: 12px;
+    border: 1px solid lightgray;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 8px;
+    box-shadow: 0 3px 3px 1px lightgrey;
+    margin-bottom: 15px !important;
+}
+
+td.participant {
+    position: relative;
+}
+
+    td.participant .btn-close {
+        cursor: pointer;
+        position: absolute;
+        top: 8px;
+        right: -3px;
+    }
+
+    td.participant .data {
+        word-break: break-word;
+    }
+
+.jumbotron {
+    padding-bottom: 16px;
+}
+
+    .jumbotron h2 {
+        margin-top: -20px;
+        margin-bottom: -15px;
+    }
+
+.btn-success {
+    background: green;
+}
+
+.btn-danger {
+    background: #E50007;
+}

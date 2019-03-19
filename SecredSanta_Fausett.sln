@@ -1,0 +1,42 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.438
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SecretSanta", "SecretStanta\SecretSanta.csproj", "{138DAC72-2709-4925-B909-2FCD138C4D76}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SecretSanta.Tests", "SecretStanta.Tests\SecretSanta.Tests.csproj", "{B95EB988-7E8A-493E-8486-ABEBB555603A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SecretSanta.Core", "SecretSanta.Core\SecretSanta.Core.csproj", "{991FCD2B-193F-4043-89CF-50B31E4AC33E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SecretSanta.Models", "SecretSanta.Models\SecretSanta.Models.csproj", "{54C2388F-5F4A-457A-A776-14614AD50580}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{138DAC72-2709-4925-B909-2FCD138C4D76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{138DAC72-2709-4925-B909-2FCD138C4D76}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{138DAC72-2709-4925-B909-2FCD138C4D76}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{138DAC72-2709-4925-B909-2FCD138C4D76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B95EB988-7E8A-493E-8486-ABEBB555603A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B95EB988-7E8A-493E-8486-ABEBB555603A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B95EB988-7E8A-493E-8486-ABEBB555603A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B95EB988-7E8A-493E-8486-ABEBB555603A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{991FCD2B-193F-4043-89CF-50B31E4AC33E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{991FCD2B-193F-4043-89CF-50B31E4AC33E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{991FCD2B-193F-4043-89CF-50B31E4AC33E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{991FCD2B-193F-4043-89CF-50B31E4AC33E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54C2388F-5F4A-457A-A776-14614AD50580}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54C2388F-5F4A-457A-A776-14614AD50580}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54C2388F-5F4A-457A-A776-14614AD50580}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54C2388F-5F4A-457A-A776-14614AD50580}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0F8D4B64-4590-48D1-86F3-3958B8419AA2}
+	EndGlobalSection
+EndGlobal

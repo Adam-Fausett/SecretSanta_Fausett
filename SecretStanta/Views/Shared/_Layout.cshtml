@@ -1,0 +1,49 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>@(!string.IsNullOrEmpty(ViewBag.Title) ? ViewBag.Title + " - " : "")Secret Santa</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    
+    <link rel="shortcut icon" href="@Url.Content("~/favicon.ico")" />
+
+    @Styles.Render("~/Content/css")
+</head>
+<body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                @Html.ActionLink("Secret Santa " + DateTime.Now.Year, "Index", "Home", new { area = "" }, new { @class = "navbar-brand", tabindex = "-1" })
+            </div>
+        </div>
+    </div>
+    <div class="container body-content">
+        <div class="content">
+            @RenderBody()
+        </div>
+        <hr />
+        <footer>
+            <center>
+                <p>&copy; @DateTime.Now.Year - North Pole Development Group, LLC. All Rights Reserved.</p>
+            </center>
+        </footer>
+    </div>
+
+    <div class="error-summary">
+        <div id="summary"></div>
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/knockout")
+    @Scripts.Render("~/bundles/common")
+
+    @RenderSection("scripts", required: false)
+
+</body>
+</html>

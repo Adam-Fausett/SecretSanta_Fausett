@@ -1,0 +1,242 @@
+﻿@{
+}
+
+<link type="text/css" href="~/Content/HomePage.css" rel="stylesheet" />
+
+<div class="jumbotron">
+    <center><h2>Secret Santa!</h2></center>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <img class="logo img-responsive" style="float: left; margin: 10px;" src="@Url.Content("~/Content/Images/logo.png")" width="150" />
+            <p class="description">
+                Secret Santa is a popular holiday tradition for a gift exchange within a group of people where names are drawn from hat&hellip;blah, blah - who wants to draw names when WE HAVE COMPUTERS?!!?!?!
+                <br />Below you can tell ol' Computer Santa who all's coming to your Yuletide Shindig and we'll mix it up for ya!
+                You can even add multiple groups if you want to keep certian people from being assigned to each other, etc&hellip;
+            </p>
+            <p class="clear">
+                <center>When you're ready, poke the big red button below to get the party started!</center>
+                <center><span class="text-muted">(Hey!, you can redraw at anytime if you don't like the way it shakes out)</span></center>
+            </p>
+            <p class="clear">
+                <button class="btn btn-success" data-bind="click: addGroup" tabindex="-1">Create Group</button>
+                <button id="btnDrawNames" type="button" tabindex="-1" class="btn btn-danger pull-right"
+                        data-loading-text="<span class='glyphicon glyphicon-refresh fast-right-spinner'></span>&nbsp; Drawing&hellip;"
+                        data-success-text="Let the gift-giving begin! <span class='glyphicon glyphicon-tree-conifer'></span> <span class='glyphicon glyphicon-gift'></span>"
+                        data-bind="click: drawNames">
+                    Draw Names
+                </button>
+            </p>
+        </div>
+    </div>
+</div>
+
+<br />
+
+<div class="row groups">
+    <div data-bind="foreach: groups">
+        <div class="col-xs-12 col-sm-4 col-md-3">
+            <div class="group">
+                <fieldset>
+                    <center>
+                        <legend data-bind="text: name, attr: { contenteditable: $index() != 0, 'data-toggle': ($index() != 0) ? 'popover' : '' }"
+                                data-content="<nobr>Click to edit the group name</nobr>"
+                                data-trigger="hover"
+                                data-placement="top"
+                                tabindex="-1">
+                        </legend>
+                        <span class="btn-close" data-bind="visible: $index() > 0, click: () => { $parent.removeGroup($index()); }">&times;</span>
+                    </center>
+                    <span data-bind="html: warningMessage, visible: warningMessage" class="text-warning"></span>
+                    <table class="table">
+                        <thead>
+                        </thead>
+                        <tbody data-bind="foreach: participants">
+                            <tr>
+                                <td class="participant">
+                                    <div class="data" data-bind="editableHTML: $data" contenteditable="true" tabindex="-1"></div>
+                                    <span class="btn-close" data-bind="click: () => { $parent.removeParticipant($index()); $root.validateGroups(); }">&times;</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <form data-bind="submit: () => { addParticipant(); $parent.validateGroups(); }">
+                        <div class="input-group">
+                            <input type="text"
+                                   class="form-control"
+                                   data-bind="value: newParticipantName, attr: { tabindex: $index() + 1 }"
+                                   placeholder="Name"
+                                   autofocus />
+                            <span class="input-group-btn">
+                                <button type="submit" class="btn btn-default" tabindex="-1"><span class="glyphicon glyphicon-plus"></span></button>
+                            </span>
+                        </div>
+                    </form>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" data-bind="if: results().length > 0">
+    <hr />
+
+    <div id="results" class="col-xs-12">
+        <fieldset>
+            <legend>The results are in!</legend>
+            <p>
+                Listed below are the Secret Santas with their Recipients!
+            </p>
+            <div data-bind="foreach: results">
+                <div class="col-xs-12">
+                    <label data-bind="text: Name"></label> -> <span data-bind="text: (Recipient || {}).Name || '??'"></span> 
+                </div>
+            </div>
+        </fieldset>
+    </div>
+</div>
+
+
+@section scripts {
+<script type="text/javascript">
+    (() => {
+        function Group(name) {
+            var self = this;
+
+            self.name = name;
+
+            self.warningMessage = ko.observable('');
+
+            self.participants = ko.observableArray([]);
+
+            self.newParticipantName = ko.observable('');
+
+            self.addParticipant = () => {
+                if (self.newParticipantName()) {
+                    self.participants.push(ko.observable(self.newParticipantName()));
+                    self.newParticipantName('');
+                }
+            };
+
+            self.removeParticipant = (indexToRemove) => {
+                self.participants.splice(indexToRemove, 1);
+            };
+
+            self.getParticipants = () => {
+                return self.participants().map((participant) => { return { name: participant() }; });
+            };
+        }
+
+        function SecretSantaViewModel() {
+            var self = this;
+
+            self.groups = ko.observableArray([new Group('Individual Participants')]);
+
+            self.results = ko.observableArray([]);
+
+            self.addGroup = () => {
+                self.groups.push(new Group(`Group #${self.groups().length}`));
+                setupPopovers();
+                $('[autofocus]:last').focus();
+            };
+
+            self.removeGroup = (indexToRemove) => {
+                self.groups.splice(indexToRemove, 1);
+                self.validateGroups();
+            };
+
+            let _validateParticipants = () => {
+                let participantCount = self.groups().reduce((total, group, test) => { return total + group.getParticipants().length; }, 0);
+
+                // must have participants to draw names
+                if (participantCount == 0) {
+                    TOAST.warn('Whoa!, hold on there&hellip;<br />You\'re gonna have to add some people first!');
+                    return false;
+                }
+
+                // must have more than one participant to draw names
+                if (participantCount == 1) {
+                    TOAST.warn('Unfortunately, 1 person just isn\'t a party&hellip;<br />You\'re gonna have to add some more people!');
+                    return false;
+                }
+
+                let _sentGroupSizeWarning = false;
+                for(let i = 1; i < self.groups().length; ++i) {
+                    let groupSize = self.groups()[i].participants().length;
+                    if (groupSize > (participantCount - groupSize)) {
+                        if (!_sentGroupSizeWarning) {
+                            TOAST.warn('Some of the groups are too big and will result in some participants not getting to play :(');
+                            _sentGroupSizeWarning = true;
+                        }
+                    }
+                }
+
+                return true;
+            };
+
+            self.validateGroups = () => {
+                let participantCount = self.groups().reduce((total, group, test) => { return total + group.getParticipants().length; }, 0);
+                for(let i = 1; i < self.groups().length; ++i) {
+                    let groupSize = self.groups()[i].participants().length;
+                    if (groupSize > (participantCount - groupSize)) {
+                        self.groups()[i].warningMessage('This group is a bit too large - consider breaking it up&hellip;<br /><center><span class="text-muted">(everyone may not get to play)</span></center>');
+                    }
+                    else if (groupSize == 1) {
+                        self.groups()[i].warningMessage('Groups should have <i>at least</i> <b>2</b> members to be effective&hellip;');
+                    }
+                    else {
+                        self.groups()[i].warningMessage('');
+                    }
+                }
+            };
+
+            self.drawNames = () => {
+                if (_validateParticipants()) {
+                    var postData = [];
+                    for(let i = 0; i < self.groups().length; ++i) {
+                        var groupParticipants = self.groups()[i].getParticipants();
+                        // the first group is the Individual Participants and they need to be split up
+                        if (i == 0) {
+                            for(let j = 0; j < groupParticipants.length; ++j) {
+                                postData.push([groupParticipants[j]]);
+                            }
+                        }
+                        else if (groupParticipants.length > 0) {
+                            postData.push(groupParticipants);
+                        }
+                    }
+
+                    var ajaxSettings = {
+                        type: 'POST',
+                        url: '@Url.HttpRouteUrl("DefaultApi", new { controller = "SecretSanta" })' + '/DrawNames',
+                        dataType: 'json',
+                        contentType: 'application/json; charset=utf-8',
+                        data: JSON.stringify(postData),
+                    };
+
+                    loadingButtonAjax.call($('#btnDrawNames'), ajaxSettings)
+                        .then((data) => {
+                            self.results(data);
+                            // scroll to the results section
+                            document.querySelector('#results').scrollIntoView({
+                              behavior: 'smooth'
+                            });
+                        });
+                }
+            };
+        }
+
+        ko.applyBindings(new SecretSantaViewModel());
+    })();
+
+    // setup Popovers
+    function setupPopovers() {
+        $('[data-toggle="popover"]').popover({
+            html: true
+        });
+    }
+
+    setupPopovers();
+
+</script>
+}
