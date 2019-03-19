@@ -13,6 +13,7 @@ There is a web UI and also a REST api as part of this project.
 - Open the solution in Visual Studio
 - Restore NuGet packages
   - right-click on the solution > restore NuGet packages...
+- Rebuild solution
 - Run locally using IIS Express
   - this should open a browser for you automatically
 
