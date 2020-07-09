@@ -37,7 +37,7 @@
 <br />
 
 <div class="row groups" data-bind="foreach: groups">
-    <div class="px-2 col-12 col-sm-4 col-md-3">
+    <div class="px-2 col-12 col-sm-4 col-md-3" data-bind="attr: { 'data-group': id }">
         <fieldset class="group">
             <div>
                 <legend data-bind="text: name, attr: { contenteditable: $index() != 0, 'data-toggle': ($index() != 0) ? 'popover' : '' }"
@@ -102,119 +102,122 @@
 @section scripts {
 
     <script type="text/javascript">
-    (() => {
-        function Group(name) {
-            var self = this;
-            self.name = name;
-            self.warningMessage = ko.observable('');
-            self.participants = ko.observableArray([]);
-            self.newParticipantName = ko.observable('');
-            self.addParticipant = () => {
-                if (self.newParticipantName()) {
-                    self.participants.push(ko.observable(self.newParticipantName()));
-                    self.newParticipantName('');
-                }
-            };
-            self.removeParticipant = (indexToRemove) => {
-                self.participants.splice(indexToRemove, 1);
-            };
-            self.getParticipants = () => {
-                return self.participants().map((participant) => { return { name: participant() }; });
-            };
-        }
-        function SecretSantaViewModel() {
-            var self = this;
-            self.groups = ko.observableArray([new Group('Individual Participants')]);
-            self.results = ko.observableArray([]);
-            self.addGroup = () => {
-                self.groups.push(new Group(`Group #${self.groups().length}`));
-                setupPopovers();
-                $('[autofocus]:last').focus();
-            };
-            self.removeGroup = (indexToRemove) => {
-                self.groups.splice(indexToRemove, 1);
-                self.validateGroups();
-            };
-            let _validateParticipants = () => {
-                let participantCount = self.groups().reduce((total, group, test) => { return total + group.getParticipants().length; }, 0);
-                // must have participants to draw names
-                if (participantCount == 0) {
-                    TOAST.warn('Whoa!, hold on there&hellip;<br />You\'re gonna have to add some people first!');
-                    return false;
-                }
-                // must have more than one participant to draw names
-                if (participantCount == 1) {
-                    TOAST.warn('Unfortunately, 1 person just isn\'t a party&hellip;<br />You\'re gonna have to add some more people!');
-                    return false;
-                }
-                let _sentGroupSizeWarning = false;
-                for(let i = 1; i < self.groups().length; ++i) {
-                    let groupSize = self.groups()[i].participants().length;
-                    if (groupSize > (participantCount - groupSize)) {
-                        if (!_sentGroupSizeWarning) {
-                            TOAST.warn('Some of the groups are too big and will result in some participants not getting to play :(');
-                            _sentGroupSizeWarning = true;
-                        }
+        (() => {
+            function Group(id, name) {
+                var self = this;
+                self.id = id;
+                self.name = name;
+                self.warningMessage = ko.observable('');
+                self.participants = ko.observableArray([]);
+                self.newParticipantName = ko.observable('');
+                self.addParticipant = () => {
+                    if (self.newParticipantName()) {
+                        self.participants.push(ko.observable(self.newParticipantName()));
+                        self.newParticipantName('');
                     }
-                }
-                return true;
-            };
-            self.validateGroups = () => {
-                let participantCount = self.groups().reduce((total, group, test) => { return total + group.getParticipants().length; }, 0);
-                for(let i = 1; i < self.groups().length; ++i) {
-                    let groupSize = self.groups()[i].participants().length;
-                    if (groupSize > (participantCount - groupSize)) {
-                        self.groups()[i].warningMessage('This group is a bit too large - consider breaking it up&hellip;<br /><center><span class="text-muted">(everyone may not get to play)</span></center>');
+                    $(`[data-group=${self.id}] [autofocus]:last`).focus();
+                };
+                self.removeParticipant = (indexToRemove) => {
+                    self.participants.splice(indexToRemove, 1);
+                };
+                self.getParticipants = () => {
+                    return self.participants().map((participant) => { return { name: participant() }; });
+                };
+            }
+            function SecretSantaViewModel() {
+                var self = this;
+                self.groups = ko.observableArray([new Group(0, 'Individual Participants')]);
+                self.results = ko.observableArray([]);
+                self.addGroup = () => {
+                    const groupId = self.groups().length;
+                    self.groups.push(new Group(groupId, `Group #${groupId}`));
+                    setupPopovers();
+                    $('[autofocus]:last').focus();
+                };
+                self.removeGroup = (indexToRemove) => {
+                    self.groups.splice(indexToRemove, 1);
+                    self.validateGroups();
+                };
+                let _validateParticipants = () => {
+                    let participantCount = self.groups().reduce((total, group, test) => { return total + group.getParticipants().length; }, 0);
+                    // must have participants to draw names
+                    if (participantCount == 0) {
+                        TOAST.warn('Whoa!, hold on there&hellip;<br />You\'re gonna have to add some people first!');
+                        return false;
                     }
-                    else if (groupSize == 1) {
-                        self.groups()[i].warningMessage('Groups should have <i>at least</i> <b>2</b> members to be effective&hellip;');
+                    // must have more than one participant to draw names
+                    if (participantCount == 1) {
+                        TOAST.warn('Unfortunately, 1 person just isn\'t a party&hellip;<br />You\'re gonna have to add some more people!');
+                        return false;
                     }
-                    else {
-                        self.groups()[i].warningMessage('');
-                    }
-                }
-            };
-            self.drawNames = () => {
-                if (_validateParticipants()) {
-                    var postData = [];
-                    for(let i = 0; i < self.groups().length; ++i) {
-                        var groupParticipants = self.groups()[i].getParticipants();
-                        // the first group is the Individual Participants and they need to be split up
-                        if (i == 0) {
-                            for(let j = 0; j < groupParticipants.length; ++j) {
-                                postData.push([groupParticipants[j]]);
+                    let _sentGroupSizeWarning = false;
+                    for (let i = 1; i < self.groups().length; ++i) {
+                        let groupSize = self.groups()[i].participants().length;
+                        if (groupSize > (participantCount - groupSize)) {
+                            if (!_sentGroupSizeWarning) {
+                                TOAST.warn('Some of the groups are too big and will result in some participants not getting to play :(');
+                                _sentGroupSizeWarning = true;
                             }
                         }
-                        else if (groupParticipants.length > 0) {
-                            postData.push(groupParticipants);
+                    }
+                    return true;
+                };
+                self.validateGroups = () => {
+                    let participantCount = self.groups().reduce((total, group, test) => { return total + group.getParticipants().length; }, 0);
+                    for (let i = 1; i < self.groups().length; ++i) {
+                        let groupSize = self.groups()[i].participants().length;
+                        if (groupSize > (participantCount - groupSize)) {
+                            self.groups()[i].warningMessage('This group is a bit too large - consider breaking it up&hellip;<br /><center><span class="text-muted">(everyone may not get to play)</span></center>');
+                        }
+                        else if (groupSize == 1) {
+                            self.groups()[i].warningMessage('Groups should have <i>at least</i> <b>2</b> members to be effective&hellip;');
+                        }
+                        else {
+                            self.groups()[i].warningMessage('');
                         }
                     }
-                    var ajaxSettings = {
-                        type: 'POST',
-                        url: 'api/SecretSanta/DrawNames',
-                        dataType: 'json',
-                        contentType: 'application/json; charset=utf-8',
-                        data: JSON.stringify(postData),
-                    };
-                    loadingButtonAjax.call($('#btnDrawNames'), ajaxSettings)
-                        .then((data) => {
-                            self.results(data);
-                            // scroll to the results section
-                            document.querySelector('#results').scrollIntoView({
-                              behavior: 'smooth'
+                };
+                self.drawNames = () => {
+                    if (_validateParticipants()) {
+                        var postData = [];
+                        for (let i = 0; i < self.groups().length; ++i) {
+                            var groupParticipants = self.groups()[i].getParticipants();
+                            // the first group is the Individual Participants and they need to be split up
+                            if (i == 0) {
+                                for (let j = 0; j < groupParticipants.length; ++j) {
+                                    postData.push([groupParticipants[j]]);
+                                }
+                            }
+                            else if (groupParticipants.length > 0) {
+                                postData.push(groupParticipants);
+                            }
+                        }
+                        var ajaxSettings = {
+                            type: 'POST',
+                            url: 'api/SecretSanta/DrawNames',
+                            dataType: 'json',
+                            contentType: 'application/json; charset=utf-8',
+                            data: JSON.stringify(postData),
+                        };
+                        loadingButtonAjax.call($('#btnDrawNames'), ajaxSettings)
+                            .then((data) => {
+                                self.results(data);
+                                // scroll to the results section
+                                document.querySelector('#results').scrollIntoView({
+                                    behavior: 'smooth'
+                                });
                             });
-                        });
-                }
-            };
+                    }
+                };
+            }
+            ko.applyBindings(new SecretSantaViewModel());
+        })();
+        // setup Popovers
+        function setupPopovers() {
+            $('[data-toggle="popover"]').popover({
+                html: true
+            });
         }
-        ko.applyBindings(new SecretSantaViewModel());
-    })();
-    // setup Popovers
-    function setupPopovers() {
-        $('[data-toggle="popover"]').popover({
-            html: true
-        });
-    }
-    setupPopovers();
+        setupPopovers();
     </script>
 }
