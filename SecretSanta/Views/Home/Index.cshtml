@@ -81,21 +81,27 @@
 <div data-bind="if: results().length > 0">
     <hr />
 
-    <div class="row">
-        <div id="results" class="col col-12">
-            <fieldset>
-                <legend>The results are in!</legend>
-                <p>
-                    Listed below are the Secret Santas with their Recipients!
-                </p>
-                <div data-bind="foreach: results">
-                    <div class="col col-12">
-                        <label data-bind="text: name"></label> -> <span data-bind="text: (recipient || {}).name || '??'"></span>
-                    </div>
-                </div>
-            </fieldset>
-        </div>
-    </div>
+    <fieldset>
+        <legend>The results are in! 🎉</legend>
+    </fieldset>
+    
+    <br />
+
+    <table id="results" class="table table-bordered table-striped table-hover">
+        <caption>Secret Santas and their Recipients!</caption>
+        <thead>
+        <tr>
+            <th>Santa</th>
+            <th>Recipient</th>
+        </tr>
+        </thead>
+        <tbody data-bind="foreach: results">
+        <tr>
+            <td data-bind="text: name"></td>
+            <td data-bind="text: (recipient || {}).name || '??'"></td>
+        </tr>
+        </tbody>
+    </table>
 </div>
 
 
