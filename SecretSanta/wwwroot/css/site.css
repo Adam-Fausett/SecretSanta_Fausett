@@ -174,7 +174,7 @@ button[disabled] {
     }
 }
 
-.glyphicon.fast-right-spinner {
+.fast-right-spinner {
     -webkit-animation: glyphicon-spin-r 1s infinite linear;
     animation: glyphicon-spin-r 1s infinite linear;
     position: relative;

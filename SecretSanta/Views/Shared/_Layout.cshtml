@@ -54,6 +54,23 @@
     <script src="~/js/knockout-custombindings.js"></script>
     <script src="~/js/toast.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        // Loading button plugin (removed from BS4)
+        (function($) {
+            $.fn.button = function(action) {
+                if (action === 'loading' && this.data('loading-text')) {
+                    this.data('original-text', this.html()).html(this.data('loading-text')).prop('disabled', true);
+                }
+                if (action === 'reset' && this.data('original-text')) {
+                    this.html(this.data('original-text')).prop('disabled', false);
+                }
+            };
+        }(jQuery));
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
     <script>
         $(() => {
