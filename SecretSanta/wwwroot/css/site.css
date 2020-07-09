@@ -87,8 +87,8 @@ body {
 .row.groups fieldset legend ~ .btn-close {
     cursor: pointer;
     position: absolute;
-    top: -10px;
-    right: -4px;
+    top: -4px;
+    right: 3px;
 }
 
 .groups [class^="col-"] {
