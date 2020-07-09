@@ -8,17 +8,26 @@ namespace SecretSanta
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
+            CurrentEnvironment = env;
         }
 
+        public IWebHostEnvironment CurrentEnvironment { get; }
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews().AddRazorRuntimeCompilation();
+            if (CurrentEnvironment.IsDevelopment())
+            {
+                services.AddControllersWithViews().AddRazorRuntimeCompilation();
+            }
+            else
+            {
+                services.AddControllersWithViews();
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
