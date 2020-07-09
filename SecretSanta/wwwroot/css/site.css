@@ -71,10 +71,10 @@ body {
 }
 
 /* Custom styling
---------------------------------------------------- */
-﻿.description {
-     padding-top: 30px;
- }
+---------------------------------------------------*/
+.description {
+    padding-top: 15px;
+}
 
 .row.groups fieldset {
     position: relative;
@@ -147,6 +147,7 @@ td.participant .data {
 }
 
 .logo {
+    margin-top: -30px !important;
     margin-bottom: 15px;
 }
 

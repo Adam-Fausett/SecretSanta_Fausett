@@ -44,7 +44,7 @@
         if (message && message.trim().length > 0) {
             var notificationID = lastNotificaitonID++;
 
-            notificationSummary.prepend('<div id="summaryelement_' + notificationID + '" class="clearfix"><div class="alert alert-' + messageType.class + ' pull-right" style="position: relative;' + (forceClose || messageType.showClose ? ' padding-right: 26px;' : '') + '"><span class="glyphicon ' + messageType.glyphicon + '"></span>' + (messageType.glyphicon ? '&nbsp;&nbsp;' : '') + message + (forceClose || messageType.showClose ? '&nbsp;&nbsp;<button type="button" class="close" style="position: absolute; top: 8px; right: 8px;" onclick="TOAST.removeToast(' + notificationID + ');">&times;</button>' : '') + '</div></div>');
+            notificationSummary.prepend('<div id="summaryelement_' + notificationID + '" class="clearfix"><div class="alert alert-' + messageType.class + ' float-right" style="position: relative;' + (forceClose || messageType.showClose ? ' padding-right: 26px;' : '') + '"><span class="glyphicon ' + messageType.glyphicon + '"></span>' + (messageType.glyphicon ? '&nbsp;&nbsp;' : '') + message + (forceClose || messageType.showClose ? '&nbsp;&nbsp;<button type="button" class="close" style="position: absolute; top: 8px; right: 8px;" onclick="TOAST.removeToast(' + notificationID + ');">&times;</button>' : '') + '</div></div>');
 
             if (!forceClose) {
                 var minToastMillis = (messageType.minimumToastMillis || 3000);

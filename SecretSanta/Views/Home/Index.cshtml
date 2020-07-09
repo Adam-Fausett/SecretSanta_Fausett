@@ -4,20 +4,24 @@
 <div class="jumbotron">
     <h2 class="text-center">Secret Santa!</h2>
     <div class="row">
-        <div class="offset-sm-1 col-sm-10">
-            <img class="logo img-responsive" style="float: left; margin: 10px;" src="~/images/logo.png" width="150" />
-            <p class="description">
-                Secret Santa is a popular holiday tradition for a gift exchange within a group of people where names are drawn from hat&hellip;blah, blah - who wants to draw names when WE HAVE COMPUTERS?!!?!?!
-                <br />Below you can tell ol' Computer Santa who all's coming to your Yuletide Shindig and we'll mix it up for ya!
-                You can even add multiple groups if you want to keep certain people from being assigned to each other, etc&hellip;
-            </p>
-            <p class="clear">
-                <div class="text-center">When you're ready, poke the big red button below to get the party started!</div>
-                <div class="text-center"><span class="text-muted">(Hey!, you can redraw at anytime if you don't like the way it shakes out)</span></div>
-            </p>
+        <div class="col col-11">
+            <img class="logo img float-left m-2" src="~/images/logo.png" width="150" />
+            <div class="description">
+                <p>
+                    Secret Santa is a popular holiday tradition for a gift exchange within a group of people where names are drawn from hat&hellip;blah, blah - who wants to draw names when WE HAVE COMPUTERS?!!?!?!
+                    <br />Below you can tell ol' Computer Santa who all's coming to your Yuletide Shindig and we'll mix it up for ya!
+                    You can even add multiple groups if you want to keep certain people from being assigned to each other, etc&hellip;
+                </p>
+                <p>
+                    When you're ready, poke the big red button below to get the party started! <br/>
+                    <span class="text-muted">(Hey!, you can redraw at anytime if you don't like the way it shakes out)</span>
+                </p>
+            </div>
+        </div>
+        <div class="col">
             <p class="clear">
                 <button class="btn btn-success" data-bind="click: addGroup" tabindex="-1">Create Group</button>
-                <button id="btnDrawNames" type="button" tabindex="-1" class="btn btn-danger pull-right"
+                <button id="btnDrawNames" type="button" tabindex="-1" class="btn btn-danger float-right"
                         data-loading-text="<span class='glyphicon glyphicon-refresh fast-right-spinner'></span>&nbsp; Drawing&hellip;"
                         data-success-text="Let the gift-giving begin! <span class='glyphicon glyphicon-tree-conifer'></span> <span class='glyphicon glyphicon-gift'></span>"
                         data-bind="click: drawNames">
@@ -74,21 +78,23 @@
     </div>
 </div>
 
-<div class="row" data-bind="if: results().length > 0">
+<div data-bind="if: results().length > 0">
     <hr />
 
-    <div id="results" class="col col-12">
-        <fieldset>
-            <legend>The results are in!</legend>
-            <p>
-                Listed below are the Secret Santas with their Recipients!
-            </p>
-            <div data-bind="foreach: results">
-                <div class="col col-12">
-                    <label data-bind="text: name"></label> -> <span data-bind="text: (recipient || {}).name || '??'"></span>
+    <div class="row">
+        <div id="results" class="col col-12">
+            <fieldset>
+                <legend>The results are in!</legend>
+                <p>
+                    Listed below are the Secret Santas with their Recipients!
+                </p>
+                <div data-bind="foreach: results">
+                    <div class="col col-12">
+                        <label data-bind="text: name"></label> -> <span data-bind="text: (recipient || {}).name || '??'"></span>
+                    </div>
                 </div>
-            </div>
-        </fieldset>
+            </fieldset>
+        </div>
     </div>
 </div>
 
