@@ -45,11 +45,12 @@
                         data-trigger="hover"
                         data-placement="top"
                         tabindex="-1">
+                    Individual Participants
                 </legend>
-                <span class="btn-close" data-bind="visible: $index() > 0, click: () => { $parent.removeGroup($index()); }">&times;</span>
+                <span class="btn-close hide" data-bind="css: { hide: $index() === 0 }, click: () => { $parent.removeGroup($index()); }">&times;</span>
             </div>
-            <span data-bind="html: warningMessage, visible: warningMessage" class="text-warning"></span>
-            <table class="table">
+            <span class="text-warning hide" data-bind="html: warningMessage, css: { hide: !warningMessage }"></span>
+            <table class="table hide" data-bind="css: { hide: participants().length === 0 }">
                 <thead>
                 </thead>
                 <tbody data-bind="foreach: participants">
@@ -78,7 +79,7 @@
     </div>
 </div>
 
-<div data-bind="if: results().length > 0">
+<div class="hide" data-bind="css: { hide: results().length === 0 }">
     <hr />
 
     <fieldset>
