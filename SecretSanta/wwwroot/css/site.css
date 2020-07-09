@@ -123,6 +123,8 @@ td.participant .data {
 
 .jumbotron {
     padding-bottom: 16px;
+    margin-left: 15vw;
+    margin-right: 15vw;
 }
 
 .jumbotron h2 {
