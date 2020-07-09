@@ -14,6 +14,7 @@ namespace SecretSanta.Core
 
             if (participants != null)
             {
+                participants.Shuffle();
                 // sort the groups to let the largest groups choose first
                 participants = participants.OrderByDescending(x => x.Length).ToArray();
 
