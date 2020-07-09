@@ -1,0 +1,221 @@
+﻿/* Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
+for details on configuring this project to bundle and minify static web assets. */
+
+a.navbar-brand {
+  white-space: normal;
+  text-align: center;
+  word-break: break-all;
+}
+
+/* Provide sufficient contrast against white background */
+a {
+  color: #0366d6;
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: #1b6ec2;
+  border-color: #1861ac;
+}
+
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+  color: #fff;
+  background-color: #1b6ec2;
+  border-color: #1861ac;
+}
+
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+  font-size: 14px;
+}
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.border-top {
+  border-top: 1px solid #e5e5e5;
+}
+.border-bottom {
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.box-shadow {
+  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+}
+
+button.accept-policy {
+  font-size: 1rem;
+  line-height: inherit;
+}
+
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  /* Margin bottom by footer height */
+  margin-bottom: 60px;
+}
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  white-space: nowrap;
+  line-height: 60px; /* Vertically center the text there */
+}
+
+/* Custom styling
+--------------------------------------------------- */
+﻿.description {
+     padding-top: 30px;
+ }
+
+.row.groups fieldset {
+    position: relative;
+}
+
+.row.groups fieldset legend {
+    border-bottom: none;
+}
+
+.row.groups fieldset legend ~ .btn-close {
+    cursor: pointer;
+    position: absolute;
+    top: -10px;
+    right: -4px;
+}
+
+.groups [class^="col-"] {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.group {
+    padding: 12px;
+    border: 1px solid lightgray;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 8px;
+    box-shadow: 0 3px 3px 1px lightgrey;
+    margin-bottom: 15px !important;
+}
+
+td.participant {
+    position: relative;
+}
+
+td.participant .btn-close {
+    cursor: pointer;
+    position: absolute;
+    top: 12px;
+    right: 0px;
+}
+
+td.participant .data {
+    word-break: break-word;
+}
+
+.jumbotron {
+    padding-bottom: 16px;
+}
+
+.jumbotron h2 {
+    margin-top: -35px;
+    margin-bottom: 15px;
+}
+
+.btn-success {
+    background: green;
+}
+
+.btn-danger {
+    background: #E50007;
+}
+
+.modal {
+    overflow: hidden;
+}
+
+.clear {
+    clear: both;
+}
+
+.logo {
+    margin-bottom: 15px;
+}
+
+/*#region Disabled*/
+[disabled] {
+    cursor: not-allowed;
+}
+
+button[disabled] {
+    cursor: not-allowed;
+    pointer-events: all !important;
+}
+/*#endregion*/
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.glyphicon.fast-right-spinner {
+    -webkit-animation: glyphicon-spin-r 1s infinite linear;
+    animation: glyphicon-spin-r 1s infinite linear;
+    position: relative;
+    top: 3px;
+}
+
+@-webkit-keyframes glyphicon-spin-r {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes glyphicon-spin-r {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
+
+/*#endregion*/
+
+/*#region Error Summary*/
+.error-summary {
+    position: fixed;
+    left: 1em;
+    right: 1em;
+    bottom: 1em;
+    z-index: 12000;
+    pointer-events: none;
+}
+
+.error-summary .alert {
+    margin-bottom: 10px !important;
+    pointer-events: auto;
+}
+/*#endregion*/

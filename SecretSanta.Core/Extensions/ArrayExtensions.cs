@@ -1,4 +1,5 @@
 ﻿using System;
+
 namespace SecretSanta.Core.Extensions
 {
     public static class ArrayExtensions

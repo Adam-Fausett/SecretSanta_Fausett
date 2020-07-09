@@ -68,6 +68,5 @@ namespace SecretSanta.Core
 
             return results;
         }
-
     }
 }
