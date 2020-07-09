@@ -1,5 +1,4 @@
-﻿using System;
-namespace SecretSanta.Models
+﻿namespace SecretSanta.Models
 {
     public class SecretSanta : Participant
     {
