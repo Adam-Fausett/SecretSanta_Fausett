@@ -33,46 +33,48 @@
 
 <br />
 
-<div class="row groups" data-bind="foreach: groups">
-    <div class="px-2 col-12 col-sm-4 col-md-3" data-bind="attr: { 'data-group': id }">
-        <fieldset class="group">
-            <div>
-                <legend data-bind="text: name, attr: { contenteditable: $index() != 0, 'data-toggle': ($index() != 0) ? 'popover' : '' }"
-                        data-content="Click to edit the group name"
-                        data-trigger="hover"
-                        data-placement="top"
-                        tabindex="-1">
-                    Individual Participants
-                </legend>
-                <span class="btn-close hide" data-bind="css: { hide: $index() === 0 }, click: () => { $parent.removeGroup($index()); }">&times;</span>
-            </div>
-            <span class="text-warning hide" data-bind="html: warningMessage, css: { hide: !warningMessage }"></span>
-            <table class="table hide" data-bind="css: { hide: participants().length === 0 }">
-                <thead>
-                </thead>
-                <tbody data-bind="foreach: participants">
+<div class="container-fluid">
+    <div class="row groups" data-bind="foreach: groups">
+        <div class="px-2 col-12 col-sm-4 col-md-3" data-bind="attr: { 'data-group': id }">
+            <fieldset class="group">
+                <div>
+                    <legend data-bind="text: name, attr: { contenteditable: $index() != 0, 'data-toggle': ($index() != 0) ? 'popover' : '' }"
+                            data-content="Click to edit the group name"
+                            data-trigger="hover"
+                            data-placement="top"
+                            tabindex="-1">
+                        Individual Participants
+                    </legend>
+                    <span class="btn-close hide" data-bind="css: { hide: $index() === 0 }, click: () => { $parent.removeGroup($index()); }">&times;</span>
+                </div>
+                <span class="text-warning hide" data-bind="html: warningMessage, css: { hide: !warningMessage }"></span>
+                <table class="table hide" data-bind="css: { hide: participants().length === 0 }">
+                    <thead>
+                    </thead>
+                    <tbody data-bind="foreach: participants">
                     <tr>
                         <td class="participant">
                             <div class="data" data-bind="editableHTML: $data" contenteditable="true" tabindex="-1"></div>
                             <span class="btn-close" data-bind="click: () => { $parent.removeParticipant($index()); $root.validateGroups(); }">&times;</span>
                         </td>
                     </tr>
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
 
-            <form data-bind="submit: () => { addParticipant(); $parent.validateGroups(); }">
-                <div class="input-group">
-                    <input type="text"
-                           class="form-control"
-                           data-bind="value: newParticipantName, attr: { tabindex: $index() + 1 }"
-                           placeholder="Name"
-                           autofocus />
-                    <span class="input-group-append">
-                        <button type="submit" class="btn" tabindex="-1"><i class="fa fa-plus"></i></button>
-                    </span>
-                </div>
-            </form>
-        </fieldset>
+                <form data-bind="submit: () => { addParticipant(); $parent.validateGroups(); }">
+                    <div class="input-group">
+                        <input type="text"
+                               class="form-control"
+                               data-bind="value: newParticipantName, attr: { tabindex: $index() + 1 }"
+                               placeholder="Name"
+                               autofocus />
+                        <span class="input-group-append">
+                            <button type="submit" class="btn" tabindex="-1"><i class="fa fa-plus"></i></button>
+                        </span>
+                    </div>
+                </form>
+            </fieldset>
+        </div>
     </div>
 </div>
 
