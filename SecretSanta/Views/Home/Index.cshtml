@@ -228,6 +228,7 @@
                             self.collections.push({ id: uuidv4(), name: ko.observable(name), groups: ko.observableArray(getDefaultGroups()) });
                             self.selectedCollection(self.collections()[self.collections().length - 1]);
                             setTimeout(focusInput, 250);
+                            self.saveCollection();
                         }
                     });
                 };
@@ -264,7 +265,7 @@
                             }
 
                             currentCollection.name(name);
-                            TOAST.success('Collection name updated');
+                            self.saveCollection();
                             setTimeout(focusInput, 250);
                         }
                     });
@@ -310,6 +311,7 @@
                     // ensure at-least one collection
                     if (self.collections().length === 0) {
                         self.collections(getDefaultCollections());
+                        self.saveCollection();
                     }
 
                     TOAST.error('Collection deleted');
