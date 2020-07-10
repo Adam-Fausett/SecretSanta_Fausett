@@ -297,7 +297,7 @@
                     }
 
                     localStorage['collections'] = JSON.stringify(collections);
-                    if (showToast) TOAST.success('Collection saved! 🎉');
+                    if (showToast) Toast.fire({ icon: 'success', title: 'Collection saved! 🎉' });
 
                     focusInput();
                 };
@@ -312,7 +312,8 @@
 
                     // filter out of in memory collections
                     self.collections(self.collections().filter(x => {
-                        if (x.id != idToRemove) return true; TOAST.error(`Deleted collection: <b>${x.name()}</b>`);
+                        if (x.id != idToRemove) return true;
+                        Toast.fire({ icon: 'error', title: `Deleted collection: <b>${x.name()}</b>` });
                     }));
 
                     // ensure at-least one collection
