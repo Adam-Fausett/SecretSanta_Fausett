@@ -102,7 +102,12 @@
 
     <div class="bd-callout bd-callout-warning">
         <p>
-            If you don't like the way the way it all shook out, feel free to draw again 👍
+            If you don't like the way the way it all shook out, feel free to 
+            <button type="button" class="btn btn-outline-primary box-shadow"
+                    data-loading-text="<i class='spinner-border spinner-border-sm'></i>&nbsp; Drawing&hellip;"
+                    data-bind="click: drawNames">
+                draw again 👍
+            </button>
         </p>
     </div>
 </div>
@@ -195,7 +200,7 @@
                         }
                     }
                 };
-                self.drawNames = () => {
+                self.drawNames = (data, event) => {
                     if (_validateParticipants()) {
                         var postData = [];
                         for (let i = 0; i < self.groups().length; ++i) {
@@ -217,10 +222,9 @@
                             contentType: 'application/json; charset=utf-8',
                             data: JSON.stringify(postData),
                         };
-                        loadingButtonAjax.call($('#btnDrawNames'), ajaxSettings)
+                        loadingButtonAjax.call($(event.currentTarget), ajaxSettings)
                             .then(data => data.map(x => { x.recipient = (x.recipient || {name: '<b class="text-danger">??</b>'}); return x; }))
                             .then((data) => {
-                            console.log(data);
                                 self.results(data);
                                 // scroll to the results section
                                 document.querySelector('#results').scrollIntoView({
