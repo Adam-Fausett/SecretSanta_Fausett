@@ -1,24 +1,22 @@
-﻿using NUnit.Framework;
-using SecretSanta.Models;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using SecretSanta.Models;
+using Xunit;
 
-namespace SecretStanta.Tests.Core
+namespace SecretSanta.Tests.Core
 {
-    [TestFixture()]
     public class SecretSantaTest
     {
         protected bool ValidateSelections(Participant[][] participants, List<SecretSanta.Models.SecretSanta> results)
         {
             // check that that no one is assigned to someone else in their group (including themselves)
-            for (int a = 0; a < participants.Length; ++a)
+            foreach (var participantGroup in participants)
             {
-                for (int b = 0; b < participants[a].Length; ++b)
+                foreach (var participantA in participantGroup)
                 {
-                    for (int c = 0; c < participants[a].Length; ++c)
+                    foreach (var participantB in participantGroup)
                     {
-                        Assert.IsEmpty(results.Where(r => r.ID == participants[a][b].ID).Where(r => r?.Recipient?.ID == participants[a][c].ID));
+                        Assert.Empty(results.Where(r => r.ID == participantA.ID).Where(r => r?.Recipient?.ID == participantB.ID));
                     }
                 }
             }
@@ -26,23 +24,23 @@ namespace SecretStanta.Tests.Core
             return true;
         }
 
-        [Test()]
+        [Fact]
         public void Common_Problem_Case_2x2x1()
         {
             // Arrange
-            Participant[][] participants = new Participant[][]
+            var participants = new[]
             {
-                new Participant[]
+                new[]
                 {
                     new Participant { Name = "3"},
                     new Participant { Name = "4"}
                 },
-                new Participant[]
+                new[]
                 {
                     new Participant { Name = "5"},
                     new Participant { Name = "6"}
                 },
-                new Participant[]
+                new[]
                 {
                     new Participant { Name = "7"}
                 }
@@ -52,29 +50,29 @@ namespace SecretStanta.Tests.Core
             var results = SecretSanta.Core.SecretSanta.DrawNames(participants);
 
             // Assert
-            Assert.IsNotEmpty(results);
-            Assert.IsEmpty(results.Where(r => r.Recipient == null));
-            Assert.IsTrue(ValidateSelections(participants, results));
+            Assert.NotEmpty(results);
+            Assert.Empty(results.Where(r => r.Recipient == null));
+            Assert.True(ValidateSelections(participants, results));
         }
 
-        [Test()]
+        [Fact]
         public void Common_Problem_Case_3x2x2()
         {
             // Arrange
-            Participant[][] participants = new Participant[][]
+            var participants = new[]
             {
-                new Participant[]
+                new[]
                 {
                     new Participant { Name = "1"},
                     new Participant { Name = "2"},
                     new Participant { Name = "3"}
                 },
-                new Participant[]
+                new[]
                 {
                     new Participant { Name = "3"},
                     new Participant { Name = "4"}
                 },
-                new Participant[]
+                new[]
                 {
                     new Participant { Name = "5"},
                     new Participant { Name = "6"}
@@ -85,34 +83,34 @@ namespace SecretStanta.Tests.Core
             var results = SecretSanta.Core.SecretSanta.DrawNames(participants);
 
             // Assert
-            Assert.IsNotEmpty(results);
-            Assert.IsEmpty(results.Where(r => r.Recipient == null));
-            Assert.IsTrue(ValidateSelections(participants, results));
+            Assert.NotEmpty(results);
+            Assert.Empty(results.Where(r => r.Recipient == null));
+            Assert.True(ValidateSelections(participants, results));
         }
 
-        [Test()]
+        [Fact]
         public void Common_Problem_Case_3x2x2x1()
         {
             // Arrange
-            Participant[][] participants = new Participant[][] 
+            var participants = new[]
             {
-                new Participant[]
+                new[]
                 {
                     new Participant { Name = "1"},
                     new Participant { Name = "2"},
                     new Participant { Name = "3"}
                 },
-                new Participant[]
+                new[]
                 {
                     new Participant { Name = "3"},
                     new Participant { Name = "4"}
                 },
-                new Participant[]
+                new[]
                 {
                     new Participant { Name = "5"},
                     new Participant { Name = "6"}
                 },
-                new Participant[]
+                new[]
                 {
                     new Participant { Name = "7"}
                 }
@@ -122,12 +120,12 @@ namespace SecretStanta.Tests.Core
             var results = SecretSanta.Core.SecretSanta.DrawNames(participants);
 
             // Assert
-            Assert.IsNotEmpty(results);
-            Assert.IsEmpty(results.Where(r => r.Recipient == null));
-            Assert.IsTrue(ValidateSelections(participants, results));
+            Assert.NotEmpty(results);
+            Assert.Empty(results.Where(r => r.Recipient == null));
+            Assert.True(ValidateSelections(participants, results));
         }
 
-        [Test()]
+        [Fact]
         public void Null_Set()
         {
             // Arrange
@@ -137,10 +135,10 @@ namespace SecretStanta.Tests.Core
             var results = SecretSanta.Core.SecretSanta.DrawNames(participants);
 
             // Assert
-            Assert.IsEmpty(results);
+            Assert.Empty(results);
         }
 
-        [Test()]
+        [Fact]
         public void Empty_Set()
         {
             // Arrange
@@ -150,7 +148,7 @@ namespace SecretStanta.Tests.Core
             var results = SecretSanta.Core.SecretSanta.DrawNames(participants);
 
             // Assert
-            Assert.IsEmpty(results);
+            Assert.Empty(results);
         }
     }
 }

@@ -1,18 +1,13 @@
-﻿using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Web.Mvc;
-using SecretSanta;
+﻿using Microsoft.AspNetCore.Mvc;
 using SecretSanta.Controllers;
+using System;
+using Xunit;
 
 namespace SecretSanta.Tests.Controllers
 {
-    [TestFixture]
     public class HomeControllerTest
     {
-        [Test]
+        [Fact]
         public void Index()
         {
             // Arrange
@@ -28,8 +23,8 @@ namespace SecretSanta.Tests.Controllers
             var expectedRuntime = isMono ? "Mono" : ".NET";
 
             // Assert
-            Assert.AreEqual(expectedVersion, result.ViewData["Version"]);
-            Assert.AreEqual(expectedRuntime, result.ViewData["Runtime"]);
+            Assert.Equal(expectedVersion, result.ViewData["Version"]);
+            Assert.Equal(expectedRuntime, result.ViewData["Runtime"]);
         }
     }
 }
