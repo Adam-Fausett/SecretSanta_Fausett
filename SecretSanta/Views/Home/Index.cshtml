@@ -31,6 +31,7 @@
 
 <div class="container-fluid">
     <button class="btn" data-bind="click: addGroup" tabindex="-1"><i class="fa fa-plus"></i> Group</button>
+    <button class="btn" data-bind="click: saveGroups" tabindex="-1"><i class="fa fa-save"></i> Save Participants</button>
     <div class="row groups" data-bind="foreach: groups">
         <div class="px-2 col-12 col-sm-4 col-xl-3" data-bind="attr: { 'data-group': id }">
             <fieldset class="group">
@@ -114,13 +115,14 @@
 
     <script type="text/javascript">
         (() => {
-            function Group(id, name) {
+            function Group(id, name, participants) {
                 var self = this;
                 self.id = id;
                 self.name = name;
                 self.warningMessage = ko.observable('');
-                self.participants = ko.observableArray([]);
+                self.participants = ko.observableArray((participants || []).map(x => ko.observable(x)));
                 self.newParticipantName = ko.observable('');
+
                 self.addParticipant = () => {
                     if (self.newParticipantName()) {
                         self.participants.push(ko.observable(self.newParticipantName()));
@@ -128,26 +130,40 @@
                     }
                     $(`[data-group=${self.id}] [autofocus]:last`).focus();
                 };
+
                 self.removeParticipant = (indexToRemove) => {
                     self.participants.splice(indexToRemove, 1);
                 };
+
                 self.getParticipants = () => {
                     return self.participants().map((participant) => { return { name: participant() }; });
                 };
             }
+
             function SecretSantaViewModel() {
                 var self = this;
-                self.groups = ko.observableArray([new Group(0, 'Individual Participants'), new Group(1, 'Group #1')]);
+                const defaultGroups = [new Group(0, 'Individual Participants'), new Group(1, 'Group #1')];
+                const savedGroups = JSON.parse(localStorage['groups'] || '[]')
+                    .map(x => new Group(x.id, x.name, x.participants));
+
+                self.groups = ko.observableArray(savedGroups.length !== 0 ? savedGroups : defaultGroups);
                 self.results = ko.observableArray([]);
+
                 self.addGroup = () => {
                     const groupId = self.groups().length;
                     self.groups.push(new Group(groupId, `Group #${groupId}`));
                     $('[autofocus]:last').focus();
                 };
+
                 self.removeGroup = (indexToRemove) => {
                     self.groups.splice(indexToRemove, 1);
                     self.validateGroups();
                 };
+
+                self.saveGroups = () => {
+                    localStorage['groups'] = JSON.stringify(self.groups().map(x => ({ ...x, participants: x.participants().map(p => p()) })));
+                };
+
                 let _validateParticipants = () => {
                     let participantCount = self.groups().reduce((total, group, test) => { return total + group.getParticipants().length; }, 0);
                     // must have participants to draw names
@@ -181,21 +197,21 @@
                     }
                     return true;
                 };
+
                 self.validateGroups = () => {
                     let participantCount = self.groups().reduce((total, group, test) => { return total + group.getParticipants().length; }, 0);
                     for (let i = 1; i < self.groups().length; ++i) {
                         let groupSize = self.groups()[i].participants().length;
                         if (groupSize > (participantCount - groupSize)) {
                             self.groups()[i].warningMessage('This group is a bit too large - consider breaking it up&hellip;<br /><center><span class="text-muted">(everyone may not get to play)</span></center>');
-                        }
-                        else if (groupSize == 1) {
+                        } else if (groupSize == 1) {
                             self.groups()[i].warningMessage('Groups should have <i>at least</i> <b>2</b> members to be effective&hellip;');
-                        }
-                        else {
+                        } else {
                             self.groups()[i].warningMessage('');
                         }
                     }
                 };
+
                 self.drawNames = (data, event) => {
                     if (_validateParticipants()) {
                         var postData = [];
@@ -206,8 +222,7 @@
                                 for (let j = 0; j < groupParticipants.length; ++j) {
                                     postData.push([groupParticipants[j]]);
                                 }
-                            }
-                            else if (groupParticipants.length > 0) {
+                            } else if (groupParticipants.length > 0) {
                                 postData.push(groupParticipants);
                             }
                         }
@@ -219,7 +234,10 @@
                             data: JSON.stringify(postData),
                         };
                         loadingButtonAjax.call($(event.currentTarget), ajaxSettings)
-                            .then(data => data.map(x => { x.recipient = (x.recipient || {name: '<b class="text-danger">??</b>'}); return x; }))
+                            .then(data => data.map(x => {
+                                x.recipient = (x.recipient || { name: '<b class="text-danger">??</b>' });
+                                return x;
+                            }))
                             .then((data) => {
                                 self.results(data);
                                 // scroll to the results section
@@ -230,8 +248,9 @@
                     }
                 };
             }
+
             ko.applyBindings(new SecretSantaViewModel());
-            
+
             $('[data-group=0] [autofocus]:last').focus();
         })();
     </script>
