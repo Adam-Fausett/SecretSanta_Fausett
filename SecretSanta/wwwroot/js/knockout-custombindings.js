@@ -6,12 +6,14 @@
 
     $element.html(initialValue);
 
-    $element.on('keyup, blur', function() {
+    $element.on('keyup blur', function() {
       var curVal = valueAccessor();
       var newVal = $element.html();
 
       if (ko.isObservable($origObservable)) {
           $origObservable(newVal);
+      } else {
+          curVal($element.html());
       }
     });
   }

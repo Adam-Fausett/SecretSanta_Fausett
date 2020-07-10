@@ -36,7 +36,7 @@
         <div class="px-2 col-12 col-sm-4 col-xl-3" data-bind="attr: { 'data-group': id }">
             <fieldset class="group">
                 <div>
-                    <legend data-bind="text: name, attr: { contenteditable: $index() != 0 }"
+                    <legend data-bind="editableHTML: name, attr: { contenteditable: $index() != 0 ? 'true' : 'false' }"
                             tabindex="-1">
                         Individual Participants
                     </legend>
@@ -118,7 +118,7 @@
             function Group(id, name, participants) {
                 var self = this;
                 self.id = id;
-                self.name = name;
+                self.name = ko.observable(name);
                 self.warningMessage = ko.observable('');
                 self.participants = ko.observableArray((participants || []).map(x => ko.observable(x)));
                 self.newParticipantName = ko.observable('');
@@ -161,7 +161,9 @@
                 };
 
                 self.saveGroups = () => {
-                    localStorage['groups'] = JSON.stringify(self.groups().map(x => ({ ...x, participants: x.participants().map(p => p()) })));
+                    const flattenedGroups = self.groups()
+                        .map(x => ({ ...x, name: x.name(), participants: x.participants().map(p => p()) }));
+                    localStorage['groups'] = JSON.stringify(flattenedGroups);
                 };
 
                 let _validateParticipants = () => {
