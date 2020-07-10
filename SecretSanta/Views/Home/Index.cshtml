@@ -18,11 +18,11 @@
     <div class="row clear">
         <div class="col">
             <p class="clear text-center">
-                <button id="btnDrawNames" type="button" tabindex="-1" class="btn btn-danger"
+                <button id="btnDrawNames" type="button" tabindex="-1" class="btn btn-danger" style="margin-left: -0.75em;"
                         data-loading-text="<i class='spinner-border spinner-border-sm'></i>&nbsp; Drawing&hellip;"
                         data-success-text="Let the gift-giving begin! <span class='fa fa-tree-conifer'></span> <span class='glyphicon glyphicon-gift'></span>"
                         data-bind="click: drawNames">
-                    <b>I'm ready!</b>
+                    <b>Draw!</b>
                 </button>
             </p>
         </div>
@@ -35,10 +35,7 @@
         <div class="px-2 col-12 col-sm-4 col-xl-3" data-bind="attr: { 'data-group': id }">
             <fieldset class="group">
                 <div>
-                    <legend data-bind="text: name, attr: { contenteditable: $index() != 0, 'data-toggle': ($index() != 0) ? 'popover' : '' }"
-                            data-content="Click to edit the group name"
-                            data-trigger="hover"
-                            data-placement="top"
+                    <legend data-bind="text: name, attr: { contenteditable: $index() != 0 }"
                             tabindex="-1">
                         Individual Participants
                     </legend>
@@ -76,7 +73,7 @@
 </div>
 
 <div class="hide" data-bind="css: { hide: results().length === 0 }">
-    <hr />
+    <hr class="mt-5" />
 
     <fieldset>
         <legend>The results are in! 🎉</legend>
@@ -145,7 +142,6 @@
                 self.addGroup = () => {
                     const groupId = self.groups().length;
                     self.groups.push(new Group(groupId, `Group #${groupId}`));
-                    setupPopovers();
                     $('[autofocus]:last').focus();
                 };
                 self.removeGroup = (indexToRemove) => {
@@ -235,15 +231,8 @@
                 };
             }
             ko.applyBindings(new SecretSantaViewModel());
-            //$('[autofocus]:last').focus();
+            
             $('[data-group=0] [autofocus]:last').focus();
         })();
-        // setup Popovers
-        function setupPopovers() {
-            $('[data-toggle="popover"]').popover({
-                html: true
-            });
-        }
-        setupPopovers();
     </script>
 }
