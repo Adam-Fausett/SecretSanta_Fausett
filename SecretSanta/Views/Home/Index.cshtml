@@ -41,9 +41,14 @@
                     </button>
                 </div>
                 <select class="custom-select" tabindex="-1"
-                        data-bind="options: collections, optionsText: 'name', value: selectedCollection">
+                        data-bind="options: collections, optionsText: 'name', value: selectedCollection, event: { change: () => focusInput() }">
                 </select>
                 <div class="input-group-append">
+                    <button type="button" class="btn btn-outline-secondary" tabindex="-1"
+                            title="save collection"
+                            data-bind="click: editCollection">
+                        <i class="fa fa-pencil"></i>
+                    </button>
                     <button type="button" class="btn btn-outline-success" tabindex="-1"
                             title="save collection"
                             data-bind="click: saveCollection">
@@ -146,7 +151,7 @@
             }
 
             function getDefaultCollections() {
-                return [{ id: 0, name: 'Collection #1', groups: ko.observableArray(getDefaultGroups()) }];
+                return [{ id: 0, name: ko.observable('Collection #1'), groups: ko.observableArray(getDefaultGroups()) }];
             }
 
             function Group(id, name, participants) {
@@ -178,7 +183,7 @@
                 var self = this;
 
                 const savedCollections = JSON.parse(localStorage['collections'] || '[]')
-                    .map(x => ({ ...x, groups: ko.observableArray(x.groups.map(g => new Group(g.id, g.name, g.participants))) }));
+                    .map(x => ({ ...x, name: ko.observable(x.name), groups: ko.observableArray(x.groups.map(g => new Group(g.id, g.name, g.participants))) }));
 
                 self.collections = ko.observableArray(
                     savedCollections.length > 0
@@ -196,7 +201,7 @@
                                 <div class="form-group row">
                                     <label for="swal-form-name" class="col-sm-3 col-form-label">Name:</label>
                                     <div class="col-sm-9">
-                                        <input id="swal-form-name" type="text" class="form-control text-lowercase" placeholder="Grandma's house" aria-label="Trigger" required>
+                                        <input id="swal-form-name" type="text" class="form-control" placeholder="Grandma's house" aria-label="Trigger" required>
                                     </div>
                                 </div>
                                 <div class="bs-callout bs-callout-warning text-left">
@@ -220,8 +225,46 @@
                                 return false;
                             }
 
-                            self.collections.push({ id: uuidv4(), name: name, groups: ko.observableArray(getDefaultGroups()) });
+                            self.collections.push({ id: uuidv4(), name: ko.observable(name), groups: ko.observableArray(getDefaultGroups()) });
                             self.selectedCollection(self.collections()[self.collections().length - 1]);
+                            setTimeout(focusInput, 250);
+                        }
+                    });
+                };
+
+                self.editCollection = () => {
+                    const currentCollection = self.selectedCollection();
+                    Swal.fire({
+                        title: 'Edit collection',
+                        html:
+                            `<hr/>
+                            <div class="text-left">
+                                <div class="form-group row">
+                                    <label for="swal-form-name" class="col-sm-3 col-form-label">Name:</label>
+                                    <div class="col-sm-9">
+                                        <input id="swal-form-name" type="text" class="form-control" placeholder="Name" aria-label="Trigger" value="${currentCollection.name()}" required>
+                                    </div>
+                                </div>
+                            </div>`,
+                        focusConfirm: false,
+                        confirmButtonText: '<i class="fa fa-save"></i>&nbsp;Save',
+                        confirmButtonColor: '#28a745',
+                        showCancelButton: true,
+                        cancelButtonText: 'Nevermind&hellip;',
+                        showLoaderOnConfirm: true,
+                        customClass: {
+                            actions: 'justify-content-end'
+                        },
+                        preConfirm: () => {
+                            const name = document.getElementById('swal-form-name').value;
+
+                            if (!name || !name.trim()) {
+                                Swal.showValidationMessage('<code>name</code>&nbsp; cannot be empty!');
+                                return false;
+                            }
+
+                            currentCollection.name(name);
+                            TOAST.success('Collection name updated');
                             setTimeout(focusInput, 250);
                         }
                     });
@@ -231,6 +274,7 @@
                     const selectedCollection = self.selectedCollection();
                     const flattenedCollection = {
                         ...selectedCollection,
+                        name: selectedCollection.name(),
                         groups: selectedCollection.groups().map(g => ({
                             ...g,
                             name: g.name(),
@@ -372,14 +416,13 @@
                 };
             }
 
-            function focusInput(groupId = 0) {
-                $(`[data-group=${groupId}] [autofocus]:last`).focus();
-            }
-
             ko.applyBindings(new SecretSantaViewModel());
 
-            //$('[data-group=0] [autofocus]:last').focus();
             focusInput();
         })();
+
+        function focusInput(groupId = 0) {
+            $(`[data-group=${groupId}] [autofocus]:last`).focus();
+        }
     </script>
 }
