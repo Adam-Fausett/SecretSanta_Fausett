@@ -2,16 +2,14 @@
 }
 
 <div class="bd-callout bd-callout-info mt-0 mb-3 box-shadow">
-    <img class="logo img-fluid float-left m-2" src="~/images/logo.png" style="max-width: 125px;" />
+    <h5>Who wants to draw names <b><i><code>WHEN WE HAVE COMPUTERS?!!?!?!</code></i></b></h5>
     <div class="description mb-3">
         <p>
-            Secret Santa is a popular holiday tradition for a gift exchange within a group of people where names are drawn from hat blah, blah, blah&hellip;
-            <br />Who wants to draw names when <b><i>WE HAVE COMPUTERS?!!?!?!</i></b>
-            <br />Below you can tell ol' Computer Santa who all's coming to your Yuletide Shindig and we'll mix it up for ya!
-            <br />You can even add multiple groups if you want to keep certain people from being assigned to each other, etc&hellip;
+            Tell ol' Computer Santa who all's coming to your Yuletide Shindig and we'll mix it up for ya!
+            <br />You can even add groups if you want to keep certain people from being assigned to each other, etc&hellip;
         </p>
         <p>
-            When you're ready, poke the big red button below to get the party started! <br />
+            When you're ready, poke the big red button to get the party started! <br/>
             <span class="text-muted">(feel free to redraw at anytime if you don't like the way it shakes out)</span>
         </p>
     </div>
@@ -33,8 +31,8 @@
     <div class="d-flex justify-content-between mb-3">
         <button class="btn" data-bind="click: addGroup" tabindex="-1"><i class="fa fa-plus"></i> Group</button>
         <div>
-            <button class="btn btn-outline-success" data-bind="click: saveGroups" tabindex="-1"><i class="fa fa-save"></i> Save Participants</button>
-            <button class="btn btn-outline-danger" data-bind="click: resetGroups" tabindex="-1"><i class="fa fa-trash"></i> Reset Participants</button>
+            <button class="btn btn-outline-success mr-1" data-bind="click: saveGroups" tabindex="-1"><i class="fa fa-save"></i> Save</button>
+            <button class="btn btn-outline-danger" data-bind="click: resetGroups" tabindex="-1"><i class="fa fa-trash"></i> Reset</button>
         </div>
     </div>
     <div class="row groups" data-bind="foreach: groups">
@@ -52,12 +50,12 @@
                     <thead>
                     </thead>
                     <tbody data-bind="foreach: participants">
-                    <tr>
-                        <td class="participant">
-                            <div class="data" data-bind="editableHTML: $data" contenteditable="true" tabindex="-1"></div>
-                            <span class="btn-close" data-bind="click: () => { $parent.removeParticipant($index()); $root.validateGroups(); }">&times;</span>
-                        </td>
-                    </tr>
+                        <tr>
+                            <td class="participant">
+                                <div class="data" data-bind="editableHTML: $data" contenteditable="true" tabindex="-1"></div>
+                                <span class="btn-close" data-bind="click: () => { $parent.removeParticipant($index()); $root.validateGroups(); }">&times;</span>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
 
@@ -67,7 +65,7 @@
                                class="form-control"
                                data-bind="value: newParticipantName, attr: { tabindex: $index() + 1 }"
                                placeholder="Name"
-                               autofocus/>
+                               autofocus />
                         <span class="input-group-append">
                             <button type="submit" class="btn" tabindex="-1"><i class="fa fa-plus"></i></button>
                         </span>
@@ -79,11 +77,12 @@
 </div>
 
 <div class="hide" data-bind="css: { hide: results().length === 0 }">
-    <hr class="mt-5" />
+    <hr class="my-5" />
 
-    <fieldset>
-        <legend>The results are in! 🎉</legend>
-    </fieldset>
+    <img class="logo img-fluid float-left mr-2" src="~/images/logo.png" style="max-width: 125px;" />
+    <h5>The results are in! 🎉</h5>
+    <p>We got 'em all matched up! Check it out below to see who's paired with who.</p>
+    <p>Go forth and be merry!</p>
 
     <br />
 
@@ -105,7 +104,7 @@
 
     <div class="bd-callout bd-callout-warning">
         <p>
-            If you don't like the way the way it all shook out, feel free to 
+            If you don't like the way the way it all shook out, feel free to
             <button type="button" class="btn btn-outline-primary box-shadow"
                     data-loading-text="<i class='spinner-border spinner-border-sm'></i>&nbsp; Drawing&hellip;"
                     data-bind="click: drawNames">
@@ -114,7 +113,6 @@
         </p>
     </div>
 </div>
-
 
 @section scripts {
 
@@ -149,7 +147,7 @@
 
             function SecretSantaViewModel() {
                 var self = this;
-                
+
                 const savedGroups = JSON.parse(localStorage['groups'] || '[]')
                     .map(x => new Group(x.id, x.name, x.participants));
 
