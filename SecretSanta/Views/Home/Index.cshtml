@@ -30,8 +30,13 @@
 </div>
 
 <div class="container-fluid">
-    <button class="btn" data-bind="click: addGroup" tabindex="-1"><i class="fa fa-plus"></i> Group</button>
-    <button class="btn" data-bind="click: saveGroups" tabindex="-1"><i class="fa fa-save"></i> Save Participants</button>
+    <div class="d-flex justify-content-between mb-3">
+        <button class="btn" data-bind="click: addGroup" tabindex="-1"><i class="fa fa-plus"></i> Group</button>
+        <div>
+            <button class="btn btn-outline-success" data-bind="click: saveGroups" tabindex="-1"><i class="fa fa-save"></i> Save Participants</button>
+            <button class="btn btn-outline-danger" data-bind="click: resetGroups" tabindex="-1"><i class="fa fa-trash"></i> Reset Participants</button>
+        </div>
+    </div>
     <div class="row groups" data-bind="foreach: groups">
         <div class="px-2 col-12 col-sm-4 col-xl-3" data-bind="attr: { 'data-group': id }">
             <fieldset class="group">
@@ -47,12 +52,12 @@
                     <thead>
                     </thead>
                     <tbody data-bind="foreach: participants">
-                        <tr>
-                            <td class="participant">
-                                <div class="data" data-bind="editableHTML: $data" contenteditable="true" tabindex="-1"></div>
-                                <span class="btn-close" data-bind="click: () => { $parent.removeParticipant($index()); $root.validateGroups(); }">&times;</span>
-                            </td>
-                        </tr>
+                    <tr>
+                        <td class="participant">
+                            <div class="data" data-bind="editableHTML: $data" contenteditable="true" tabindex="-1"></div>
+                            <span class="btn-close" data-bind="click: () => { $parent.removeParticipant($index()); $root.validateGroups(); }">&times;</span>
+                        </td>
+                    </tr>
                     </tbody>
                 </table>
 
@@ -62,7 +67,7 @@
                                class="form-control"
                                data-bind="value: newParticipantName, attr: { tabindex: $index() + 1 }"
                                placeholder="Name"
-                               autofocus />
+                               autofocus/>
                         <span class="input-group-append">
                             <button type="submit" class="btn" tabindex="-1"><i class="fa fa-plus"></i></button>
                         </span>
@@ -115,6 +120,8 @@
 
     <script type="text/javascript">
         (() => {
+            const _defaultGroups = [new Group(0, 'Individual Participants'), new Group(1, 'Group #1')];
+
             function Group(id, name, participants) {
                 var self = this;
                 self.id = id;
@@ -142,14 +149,14 @@
 
             function SecretSantaViewModel() {
                 var self = this;
-                const defaultGroups = [new Group(0, 'Individual Participants'), new Group(1, 'Group #1')];
+                
                 const savedGroups = JSON.parse(localStorage['groups'] || '[]')
                     .map(x => new Group(x.id, x.name, x.participants));
 
                 self.groups = ko.observableArray(
                     savedGroups.length > 1 || (savedGroups.length === 1 && savedGroups[0].participants().length > 0)
                         ? savedGroups
-                        : defaultGroups);
+                        : _defaultGroups);
                 self.results = ko.observableArray([]);
 
                 self.addGroup = () => {
@@ -167,6 +174,11 @@
                     const flattenedGroups = self.groups()
                         .map(x => ({ ...x, name: x.name(), participants: x.participants().map(p => p()) }));
                     localStorage['groups'] = JSON.stringify(flattenedGroups);
+                };
+
+                self.resetGroups = () => {
+                    localStorage.removeItem('groups');
+                    self.groups(_defaultGroups);
                 };
 
                 let _validateParticipants = () => {
