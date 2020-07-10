@@ -40,22 +40,25 @@
                         <i class="fa fa-plus"></i>
                     </button>
                 </div>
-                <select class="custom-select" tabindex="-1"
+                <select class="custom-select" tabindex="-1" onchange="this.blur()"
                         data-bind="options: collections, optionsText: 'name', value: selectedCollection, event: { change: () => focusInput() }">
                 </select>
                 <div class="input-group-append">
                     <button type="button" class="btn btn-outline-secondary" tabindex="-1"
                             title="save collection"
+                            onclick="this.blur()"
                             data-bind="click: editCollection">
                         <i class="fa fa-pencil"></i>
                     </button>
                     <button type="button" class="btn btn-outline-success" tabindex="-1"
                             title="save collection"
+                            onclick="this.blur()"
                             data-bind="click: saveCollection">
                         <i class="fa fa-save"></i>
                     </button>
                     <button type="button" class="btn btn-outline-danger" tabindex="-1"
                             title="delete collection"
+                            onclick="this.blur()"
                             data-bind="click: deleteCollection">
                         <i class="fa fa-trash"></i>
                     </button>
@@ -187,8 +190,8 @@
 
                 self.collections = ko.observableArray(
                     savedCollections.length > 0
-                    ? savedCollections
-                    : getDefaultCollections());
+                        ? savedCollections
+                        : getDefaultCollections());
 
                 self.selectedCollection = ko.observable(self.collections()[0]);
 
@@ -266,12 +269,12 @@
 
                             currentCollection.name(name);
                             self.saveCollection();
-                            setTimeout(focusInput, 250);
+                            //setTimeout(focusInput, 350);
                         }
                     });
                 };
 
-                self.saveCollection = () => {
+                self.saveCollection = (showToast = true) => {
                     const selectedCollection = self.selectedCollection();
                     const flattenedCollection = {
                         ...selectedCollection,
@@ -294,7 +297,9 @@
                     }
 
                     localStorage['collections'] = JSON.stringify(collections);
-                    TOAST.success('Collection saved! 🎉');
+                    if (showToast) TOAST.success('Collection saved! 🎉');
+
+                    focusInput();
                 };
 
                 self.deleteCollection = () => {
@@ -306,16 +311,15 @@
                     localStorage['collections'] = JSON.stringify(updatedCollections);
 
                     // filter out of in memory collections
-                    self.collections(self.collections().filter(x => x.id != idToRemove));
+                    self.collections(self.collections().filter(x => {
+                        if (x.id != idToRemove) return true; TOAST.error(`Deleted collection: <b>${x.name()}</b>`);
+                    }));
 
                     // ensure at-least one collection
                     if (self.collections().length === 0) {
                         self.collections(getDefaultCollections());
-                        self.saveCollection();
+                        self.saveCollection(false);
                     }
-
-                    TOAST.error('Collection deleted');
-                    focusInput();
                 };
 
                 self.groups = ko.pureComputed(() => self.selectedCollection() ? self.selectedCollection().groups() : []);
