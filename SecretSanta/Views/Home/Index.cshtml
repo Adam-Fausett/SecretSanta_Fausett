@@ -28,25 +28,28 @@
 </div>
 
 <div class="container-fluid">
-    <div class="d-flex justify-content-between mb-3">
-        <button class="btn" data-bind="click: addGroup" tabindex="-1"><i class="fa fa-plus"></i> Group</button>
-        <div>
+    <div class="row justify-content-between mb-3">
+        <div class="col-4">
+            <button class="btn" data-bind="click: addGroup" tabindex="-1"><i class="fa fa-plus"></i> Group</button>
+        </div>
+        <div class="col col-sm-6 col-md-5 col-lg-4">
             <div class="input-group">
                 <div class="input-group-prepend">
-                    <button type="button" class="btn btn-outline-secondary"
+                    <button type="button" class="btn no-outline" tabindex="-1"
                             data-bind="click: addCollection">
                         <i class="fa fa-plus"></i>
                     </button>
                 </div>
-                <select class="custom-select" data-bind="options: collections, optionsText: 'name', value: selectedCollection">
+                <select class="custom-select" tabindex="-1"
+                        data-bind="options: collections, optionsText: 'name', value: selectedCollection">
                 </select>
                 <div class="input-group-append">
-                    <button type="button" class="btn btn-outline-success"
+                    <button type="button" class="btn btn-outline-success" tabindex="-1"
                             title="save collection"
                             data-bind="click: saveCollection">
                         <i class="fa fa-save"></i>
                     </button>
-                    <button type="button" class="btn btn-outline-danger"
+                    <button type="button" class="btn btn-outline-danger" tabindex="-1"
                             title="delete collection"
                             data-bind="click: deleteCollection">
                         <i class="fa fa-trash"></i>
@@ -143,7 +146,7 @@
             }
 
             function getDefaultCollections() {
-                return [{ id: 0, name: 'Default', groups: ko.observableArray(getDefaultGroups()) }];
+                return [{ id: 0, name: 'Collection #1', groups: ko.observableArray(getDefaultGroups()) }];
             }
 
             function Group(id, name, participants) {
