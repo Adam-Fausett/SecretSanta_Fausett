@@ -1,41 +1,38 @@
 ﻿@{
 }
 
-<div class="container">
-    <div class="bd-callout bd-callout-info mt-0">
-        <img class="logo img-fluid float-left m-2" src="~/images/logo.png" style="max-width: 125px;" />
-        <div class="description">
-            <p>
-                Secret Santa is a popular holiday tradition for a gift exchange within a group of people where names are drawn from hat&hellip;blah, blah - who wants to draw names when <b><i>WE HAVE COMPUTERS?!!?!?!</i></b>
-                <br />Below you can tell ol' Computer Santa who all's coming to your Yuletide Shindig and we'll mix it up for ya!
-                You can even add multiple groups if you want to keep certain people from being assigned to each other, etc&hellip;
-            </p>
-            <p>
-                When you're ready, poke the big red button below to get the party started! <br />
-                <span class="text-muted">(Hey!, you can redraw at anytime if you don't like the way it shakes out)</span>
-            </p>
-        </div>
+<div class="bd-callout bd-callout-info mt-0 mb-3 box-shadow">
+    <img class="logo img-fluid float-left m-2" src="~/images/logo.png" style="max-width: 125px;" />
+    <div class="description mb-3">
+        <p>
+            Secret Santa is a popular holiday tradition for a gift exchange within a group of people where names are drawn from hat blah, blah, blah&hellip;
+            <br />Who wants to draw names when <b><i>WE HAVE COMPUTERS?!!?!?!</i></b>
+            <br />Below you can tell ol' Computer Santa who all's coming to your Yuletide Shindig and we'll mix it up for ya!
+            <br />You can even add multiple groups if you want to keep certain people from being assigned to each other, etc&hellip;
+        </p>
+        <p>
+            When you're ready, poke the big red button below to get the party started! <br />
+            <span class="text-muted">(feel free to redraw at anytime if you don't like the way it shakes out)</span>
+        </p>
     </div>
-    <div class="row">
+    <div class="row clear">
         <div class="col">
-            <p class="clear">
-                <button class="btn btn-success" data-bind="click: addGroup" tabindex="-1">Create Group</button>
-                <button id="btnDrawNames" type="button" tabindex="-1" class="btn btn-danger float-right"
+            <p class="clear text-center">
+                <button id="btnDrawNames" type="button" tabindex="-1" class="btn btn-danger"
                         data-loading-text="<i class='spinner-border spinner-border-sm'></i>&nbsp; Drawing&hellip;"
                         data-success-text="Let the gift-giving begin! <span class='fa fa-tree-conifer'></span> <span class='glyphicon glyphicon-gift'></span>"
                         data-bind="click: drawNames">
-                    Draw Names
+                    <b>I'm ready!</b>
                 </button>
             </p>
         </div>
     </div>
 </div>
 
-<br />
-
 <div class="container-fluid">
+    <button class="btn" data-bind="click: addGroup" tabindex="-1"><i class="fa fa-plus"></i> Group</button>
     <div class="row groups" data-bind="foreach: groups">
-        <div class="px-2 col-12 col-sm-4 col-md-3" data-bind="attr: { 'data-group': id }">
+        <div class="px-2 col-12 col-sm-4 col-xl-3" data-bind="attr: { 'data-group': id }">
             <fieldset class="group">
                 <div>
                     <legend data-bind="text: name, attr: { contenteditable: $index() != 0, 'data-toggle': ($index() != 0) ? 'popover' : '' }"
@@ -47,17 +44,17 @@
                     </legend>
                     <span class="btn-close hide" data-bind="css: { hide: $index() === 0 }, click: () => { $parent.removeGroup($index()); }">&times;</span>
                 </div>
-                <span class="text-warning hide" data-bind="html: warningMessage, css: { hide: !warningMessage }"></span>
+                <div class="bd-callout bd-callout-warning hide" data-bind="html: warningMessage, css: { hide: !warningMessage()}">test</div>
                 <table class="table hide" data-bind="css: { hide: participants().length === 0 }">
                     <thead>
                     </thead>
                     <tbody data-bind="foreach: participants">
-                    <tr>
-                        <td class="participant">
-                            <div class="data" data-bind="editableHTML: $data" contenteditable="true" tabindex="-1"></div>
-                            <span class="btn-close" data-bind="click: () => { $parent.removeParticipant($index()); $root.validateGroups(); }">&times;</span>
-                        </td>
-                    </tr>
+                        <tr>
+                            <td class="participant">
+                                <div class="data" data-bind="editableHTML: $data" contenteditable="true" tabindex="-1"></div>
+                                <span class="btn-close" data-bind="click: () => { $parent.removeParticipant($index()); $root.validateGroups(); }">&times;</span>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
 
@@ -98,7 +95,7 @@
         <tbody data-bind="foreach: results">
             <tr>
                 <td data-bind="text: name"></td>
-                <td data-bind="text: (recipient || {}).name || '??'"></td>
+                <td data-bind="html: recipient.name"></td>
             </tr>
         </tbody>
     </table>
@@ -138,7 +135,7 @@
             }
             function SecretSantaViewModel() {
                 var self = this;
-                self.groups = ko.observableArray([new Group(0, 'Individual Participants')]);
+                self.groups = ko.observableArray([new Group(0, 'Individual Participants'), new Group(1, 'Group #1')]);
                 self.results = ko.observableArray([]);
                 self.addGroup = () => {
                     const groupId = self.groups().length;
@@ -153,13 +150,22 @@
                 let _validateParticipants = () => {
                     let participantCount = self.groups().reduce((total, group, test) => { return total + group.getParticipants().length; }, 0);
                     // must have participants to draw names
-                    if (participantCount == 0) {
-                        TOAST.warn('Whoa!, hold on there&hellip;<br />You\'re gonna have to add some people first!');
+                    if (participantCount === 0) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Whoa! Hold on there&hellip;',
+                            html: '<hr />You\'re gonna have to add some people first!',
+
+                        });
                         return false;
                     }
                     // must have more than one participant to draw names
-                    if (participantCount == 1) {
-                        TOAST.warn('Unfortunately, 1 person just isn\'t a party&hellip;<br />You\'re gonna have to add some more people!');
+                    if (participantCount === 1) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Hate to tell you this, but&hellip;',
+                            html: '<hr />Unfortunately, <b>1</b> person just isn\'t a party&hellip;<br />You\'re gonna have to add some more people!',
+                        });
                         return false;
                     }
                     let _sentGroupSizeWarning = false;
@@ -195,7 +201,7 @@
                         for (let i = 0; i < self.groups().length; ++i) {
                             var groupParticipants = self.groups()[i].getParticipants();
                             // the first group is the Individual Participants and they need to be split up
-                            if (i == 0) {
+                            if (i === 0) {
                                 for (let j = 0; j < groupParticipants.length; ++j) {
                                     postData.push([groupParticipants[j]]);
                                 }
@@ -212,7 +218,9 @@
                             data: JSON.stringify(postData),
                         };
                         loadingButtonAjax.call($('#btnDrawNames'), ajaxSettings)
+                            .then(data => data.map(x => { x.recipient = (x.recipient || {name: '<b class="text-danger">??</b>'}); return x; }))
                             .then((data) => {
+                            console.log(data);
                                 self.results(data);
                                 // scroll to the results section
                                 document.querySelector('#results').scrollIntoView({
@@ -223,7 +231,8 @@
                 };
             }
             ko.applyBindings(new SecretSantaViewModel());
-            $('[autofocus]:last').focus();
+            //$('[autofocus]:last').focus();
+            $('[data-group=0] [autofocus]:last').focus();
         })();
         // setup Popovers
         function setupPopovers() {
