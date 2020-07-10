@@ -9,7 +9,7 @@
             <br />You can even add groups if you want to keep certain people from being assigned to each other, etc&hellip;
         </p>
         <p>
-            When you're ready, poke the big red button to get the party started! <br/>
+            When you're ready, poke the big red button to get the party started! <br />
             <span class="text-muted">(feel free to redraw at anytime if you don't like the way it shakes out)</span>
         </p>
     </div>
@@ -31,14 +31,28 @@
     <div class="d-flex justify-content-between mb-3">
         <button class="btn" data-bind="click: addGroup" tabindex="-1"><i class="fa fa-plus"></i> Group</button>
         <div>
-            <button class="btn btn-outline-success mr-1" 
-                    data-bind="click: saveGroups" 
-                    title="Save Participants"
-                    tabindex="-1"><i class="fa fa-save"></i> Save</button>
-            <button class="btn btn-outline-danger"
-                    data-bind="click: resetGroups" 
-                    title="Reset Participants"
-                    tabindex="-1"><i class="fa fa-trash"></i> Reset</button>
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <button type="button" class="btn btn-outline-secondary"
+                            data-bind="click: addCollection">
+                        <i class="fa fa-plus"></i>
+                    </button>
+                </div>
+                <select class="custom-select" data-bind="options: collections, optionsText: 'name', value: selectedCollection">
+                </select>
+                <div class="input-group-append">
+                    <button type="button" class="btn btn-outline-success"
+                            title="save collection"
+                            data-bind="click: saveCollection">
+                        <i class="fa fa-save"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-danger"
+                            title="delete collection"
+                            data-bind="click: deleteCollection">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
     <div class="row groups" data-bind="foreach: groups">
@@ -121,14 +135,17 @@
 </div>
 
 @section scripts {
+    <script src="https://cdn.jsdelivr.net/npm/uuid@latest/dist/umd/uuidv4.min.js"></script>
     <script type="text/javascript">
         (() => {
-            const _defaultGroups = [new Group(0, 'Individual Participants'), new Group(1, 'Group #1')];
+            function getDefaultGroups() {
+                return [new Group(0, 'Individual Participants'), new Group(1, 'Group #1')];
+            }
 
             function Group(id, name, participants) {
                 var self = this;
                 self.id = id;
-                self.name = ko.observable(name);
+                self.name = ko.observable(name || 'Unknown');
                 self.warningMessage = ko.observable('');
                 self.participants = ko.observableArray((participants || []).map(x => ko.observable(x)));
                 self.newParticipantName = ko.observable('');
@@ -153,35 +170,89 @@
             function SecretSantaViewModel() {
                 var self = this;
 
-                const savedGroups = JSON.parse(localStorage['groups'] || '[]')
-                    .map(x => new Group(x.id, x.name, x.participants));
+                const _defaultCollection = { id: 0, name: 'Default', groups: ko.observableArray(getDefaultGroups()) };
+                const savedCollections = JSON.parse(localStorage['collections'] || '[]')
+                    .map(x => ({ ...x, groups: ko.observableArray(x.groups.map(g => new Group(g.id, g.name, g.participants))) }));
 
-                self.groups = ko.observableArray(
-                    savedGroups.length > 1 || (savedGroups.length === 1 && savedGroups[0].participants().length > 0)
-                        ? savedGroups
-                        : _defaultGroups);
+                self.collections = ko.observableArray(
+                    savedCollections.length > 1
+                        ? savedCollections
+                        : [_defaultCollection]);
+                self.selectedCollection = ko.observable(self.collections()[0]);
+
+                console.log(self.collections());
+                console.log(self.selectedCollection());
+
+                self.addCollection = () => {
+                    Swal.fire({
+                        title: 'Add a new collection',
+                        html:
+                            `<hr/>
+                                    <div class="text-left">
+                                        <div class="form-group row">
+                                            <label for="swal-form-name" class="col-sm-3 col-form-label">Name:</label>
+                                            <div class="col-sm-9">
+                                                <input id="swal-form-name" type="text" class="form-control text-lowercase" placeholder="Grandma's house" aria-label="Trigger" required>
+                                            </div>
+                                        </div>
+                                        <div class="bs-callout bs-callout-warning text-left">
+                                            <code>Collections</code> let you save several participant setups
+                                        </div>
+                                    </div>`,
+                        focusConfirm: false,
+                        confirmButtonText: '<i class="fa fa-save"></i>&nbsp;Save',
+                        confirmButtonColor: '#28a745',
+                        showCancelButton: true,
+                        cancelButtonText: 'Nevermind&hellip;',
+                        showLoaderOnConfirm: true,
+                        customClass: {
+                            actions: 'justify-content-end'
+                        },
+                        preConfirm: () => {
+                            const name = document.getElementById('swal-form-name').value;
+
+                            if (!name || !name.trim()) {
+                                Swal.showValidationMessage('<code>name</code>&nbsp; cannot be empty!');
+                                return false;
+                            }
+
+                            self.collections.push({ id: uuidv4(), name: name, groups: ko.observableArray(getDefaultGroups()) });
+                            self.selectedCollection(self.collections()[self.collections().length - 1]);
+                            setTimeout(() => $('[data-group=0] [autofocus]:last').focus(), 250);
+                        }
+                    });
+                };
+
+                self.saveCollection = () => {
+                    const flattenedGroups = self.collections()
+                        .map(x => ({
+                            ...x,
+                            name: x.name,
+                            groups: x.groups().map(g => ({ ...g, name: g.name(), participants: g.participants().map(p => p()) }))
+                        }));
+                    localStorage['collections'] = JSON.stringify(flattenedGroups);
+                };
+
+                self.deleteCollection = () => {
+                    localStorage.removeItem('collections');
+                    self.groups(getDefaultGroups());
+                };
+
+                self.groups = ko.pureComputed(() => {
+                    return self.selectedCollection().groups();
+                });
+
                 self.results = ko.observableArray([]);
 
                 self.addGroup = () => {
-                    const groupId = self.groups().length;
-                    self.groups.push(new Group(groupId, `Group #${groupId}`));
+                    const collection = self.selectedCollection();
+                    collection.groups.push(new Group(uuidv4(), `Group #${collection.groups().length}`));
                     $('[autofocus]:last').focus();
                 };
 
                 self.removeGroup = (indexToRemove) => {
-                    self.groups.splice(indexToRemove, 1);
+                    self.selectedCollection().groups.splice(indexToRemove, 1);
                     self.validateGroups();
-                };
-
-                self.saveGroups = () => {
-                    const flattenedGroups = self.groups()
-                        .map(x => ({ ...x, name: x.name(), participants: x.participants().map(p => p()) }));
-                    localStorage['groups'] = JSON.stringify(flattenedGroups);
-                };
-
-                self.resetGroups = () => {
-                    localStorage.removeItem('groups');
-                    self.groups(_defaultGroups);
                 };
 
                 let _validateParticipants = () => {
