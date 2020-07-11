@@ -380,16 +380,16 @@
                     }
 
 
-                    let sendGroupSizeWarning = false;
+                    let shouldSendGroupSizeWarning = false;
                     for (let i = 1; i < self.groups().length; ++i) {
                         const groupSize = self.groups()[i].participants().length;
                         if (groupSize > (participantCount - groupSize)) {
-                            sendGroupSizeWarning = true;
+                            shouldSendGroupSizeWarning = true;
                             break;
                         }
                     }
 
-                    if (sendGroupSizeWarning) {
+                    if (shouldSendGroupSizeWarning) {
                         return Swal.fire({
                             icon: 'warning',
                             title: 'Are you sure?',
