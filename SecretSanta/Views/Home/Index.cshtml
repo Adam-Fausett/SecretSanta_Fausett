@@ -283,7 +283,6 @@
 
                             currentCollection.name(name);
                             self.saveCollection();
-                            //setTimeout(focusInput, 350);
                         }
                     });
                 };
@@ -407,7 +406,7 @@
                         return Swal.fire({
                             icon: 'warning',
                             title: 'Are you sure?',
-                            html: `Some of the groups are too large and will likely result in some participants not getting to play 😢`,
+                            html: `<hr />Some of the groups are too large and will likely result in some participants not getting to play 😢`,
                             confirmButtonText: `Let's do it anyway!`,
                             showCancelButton: true,
                             cancelButtonText: 'No, wait&hellip;',
