@@ -5,30 +5,38 @@ function delayAsync(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-/* Extends Element Objects with a function named scrollIntoViewPromise
-*  options: the normal scrollIntoView options without any changes
-*/
-
+/**
+  * Extends Element Objects with a function named scrollIntoViewAsync
+  *
+  * @param {Object} scrollOptions - the normal scrollIntoView options
+  * @param {Object} observerOptions - IntersectionObserver options
+  */
 Element.prototype.scrollIntoViewAsync = function (scrollOptions, observerOptions = {}) {
     this.scrollIntoView(scrollOptions);
+
+    const element = this;
 
     const defaultObserverOptions = {
         threshold: 1.0
     };
 
-    let parent = this;
-
-    return {
-        then: function (x) {
+    return new Promise((resolve, reject) => {
+        try {
             const intersectionObserver = new IntersectionObserver((entries) => {
-                let [entry] = entries;
+                    let [entry] = entries;
 
-                if (entry.isIntersecting) {
-                    setTimeout(() => { x(); intersectionObserver.unobserve(parent) }, 10);
-                }
-            }, Object.assign(defaultObserverOptions, observerOptions));
+                    if (entry.isIntersecting) {
+                        setTimeout(() => {
+                                resolve();
+                                intersectionObserver.unobserve(element);
+                        }, 10);
+                    }
+                },
+                Object.assign(defaultObserverOptions, observerOptions));
 
-            intersectionObserver.observe(parent);
+            intersectionObserver.observe(element);
+        } catch (error) {
+            reject(error);
         }
-    };
+    });
 }
