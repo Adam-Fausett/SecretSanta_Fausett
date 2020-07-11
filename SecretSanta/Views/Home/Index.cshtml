@@ -32,7 +32,7 @@
         <div class="col-4">
             <button class="btn" data-bind="click: addGroup" tabindex="-1"><i class="fa fa-plus"></i> Group</button>
         </div>
-        <div class="col col-sm-6 col-md-5 col-lg-4">
+        <div class="col col-sm-8 col-md-6 col-lg-5 col-xl-4">
             <div class="input-group">
                 <div class="input-group-prepend">
                     <button type="button" class="btn no-outline" tabindex="-1"
@@ -331,7 +331,7 @@
                             // filter out of in memory collections
                             self.collections(self.collections().filter(x => {
                                 if (x.id != idToRemove) return true;
-                                Toast.fire({ icon: 'error', title: `Deleted collection: <b>${x.name()}</b>` });
+                                Toast.fire({ icon: 'error', title: `Deleted collection: &nbsp;<b>${x.name()}</b>` });
                             }));
 
                             // ensure at-least one collection
