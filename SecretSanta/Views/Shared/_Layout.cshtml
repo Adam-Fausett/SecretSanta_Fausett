@@ -42,42 +42,8 @@
         </div>
     </footer>
 
-    <script src="~/js/site.min.js" asp-append-version="true"></script>
-    <script>
-        // Loading button plugin (removed from BS4)
-        (function($) {
-            $.fn.button = function(action) {
-                if (action === 'loading' && this.data('loading-text')) {
-                    this.data('original-text', this.html()).html(this.data('loading-text')).prop('disabled', true);
-                }
-                if (action === 'reset' && this.data('original-text')) {
-                    this.html(this.data('original-text')).prop('disabled', false);
-                }
-            };
-        }(jQuery));
-
-        function delay(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
-    </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
-    <script>
-        $(() => {
-            const Toast = Swal.mixin({
-                toast: true,
-                position: 'bottom-end',
-                showConfirmButton: false,
-                timer: 1500,
-                timerProgressBar: true,
-                onOpen: (toast) => {
-                    toast.addEventListener('mouseenter', Swal.stopTimer)
-                    toast.addEventListener('mouseleave', Swal.resumeTimer)
-                }
-            });
-
-            window.Toast = Toast;
-        });
-    </script>
+    <script src="~/js/site.min.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

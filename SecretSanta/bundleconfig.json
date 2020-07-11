@@ -11,8 +11,10 @@
     "inputFiles": [
       "wwwroot/lib/jquery/dist/jquery.min.js",
       "wwwroot/lib/bootstrap/dist/js/bootstrap.bundle.min.js",
+      "wwwroot/js/jquery.button.js",
       "wwwroot/js/knockout-3.5.0.js",
       "wwwroot/js/knockout-custombindings.js",
+      "wwwroot/js/sweetalert.toast.mixin.js",
       "wwwroot/js/site.js"
     ],
     "minify": {
