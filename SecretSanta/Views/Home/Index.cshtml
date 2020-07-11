@@ -208,7 +208,7 @@
                                     </div>
                                 </div>
                                 <div class="bs-callout bs-callout-warning text-left">
-                                    <code>Collections</code> let you save several participant setups
+                                    <code>Collections</code> let you create multiple sets of participants
                                 </div>
                             </div>`,
                         focusConfirm: false,
@@ -303,26 +303,44 @@
                 };
 
                 self.deleteCollection = () => {
-                    // TODO: confirmation before deleting 
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Are you sure?',
+                        html:
+                            `<hr/>
+                            <div class="bs-callout bs-callout-danger text-left">
+                                This action will permanantly wipe the <code>${self.selectedCollection().name()}</code> collection
+                            </div>`,
+                        focusConfirm: false,
+                        confirmButtonText: '🔥 Burn it with fire!',
+                        confirmButtonColor: '#dc3545',
+                        showCancelButton: true,
+                        cancelButtonText: 'Nevermind&hellip;',
+                        showLoaderOnConfirm: true,
+                        customClass: {
+                            actions: 'justify-content-end'
+                        },
+                        preConfirm: () => {
+                            const idToRemove = self.selectedCollection().id;
 
-                    const idToRemove = self.selectedCollection().id;
+                            // filter out of localStorage
+                            const updatedCollections = JSON.parse(localStorage['collections'] || '[]')
+                                .filter(x => x.id != idToRemove);
+                            localStorage['collections'] = JSON.stringify(updatedCollections);
 
-                    // filter out of localStorage
-                    const updatedCollections = JSON.parse(localStorage['collections'] || '[]')
-                        .filter(x => x.id != idToRemove);
-                    localStorage['collections'] = JSON.stringify(updatedCollections);
+                            // filter out of in memory collections
+                            self.collections(self.collections().filter(x => {
+                                if (x.id != idToRemove) return true;
+                                Toast.fire({ icon: 'error', title: `Deleted collection: <b>${x.name()}</b>` });
+                            }));
 
-                    // filter out of in memory collections
-                    self.collections(self.collections().filter(x => {
-                        if (x.id != idToRemove) return true;
-                        Toast.fire({ icon: 'error', title: `Deleted collection: <b>${x.name()}</b>` });
-                    }));
-
-                    // ensure at-least one collection
-                    if (self.collections().length === 0) {
-                        self.collections(getDefaultCollections());
-                        self.saveCollection(false);
-                    }
+                            // ensure at-least one collection
+                            if (self.collections().length === 0) {
+                                self.collections(getDefaultCollections());
+                                self.saveCollection(false);
+                            }
+                        }
+                    });
                 };
 
                 self.groups = ko.pureComputed(() => self.selectedCollection() ? self.selectedCollection().groups() : []);
