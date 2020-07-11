@@ -303,6 +303,8 @@
                 };
 
                 self.deleteCollection = () => {
+                    // TODO: confirmation before deleting 
+
                     const idToRemove = self.selectedCollection().id;
 
                     // filter out of localStorage
@@ -338,7 +340,7 @@
                     self.validateGroups();
                 };
 
-                let _validateParticipants = () => {
+                let _validateParticipants = async () => {
                     let participantCount = self.groups().reduce((total, group, test) => { return total + group.getParticipants().length; }, 0);
                     // must have participants to draw names
                     if (participantCount === 0) {
@@ -346,9 +348,8 @@
                             icon: 'warning',
                             title: 'Whoa! Hold on there&hellip;',
                             html: '<hr />You\'re gonna have to add some people first!',
-
                         });
-                        return false;
+                        return Promise.resolve(false);
                     }
                     // must have more than one participant to draw names
                     if (participantCount === 1) {
@@ -357,19 +358,35 @@
                             title: 'Hate to tell you this, but&hellip;',
                             html: '<hr />Unfortunately, <b>1</b> person just isn\'t a party&hellip;<br />You\'re gonna have to add some more people!',
                         });
-                        return false;
+                        return Promise.resolve(false);
                     }
-                    let _sentGroupSizeWarning = false;
+
+
+                    let sendGroupSizeWarning = false;
                     for (let i = 1; i < self.groups().length; ++i) {
-                        let groupSize = self.groups()[i].participants().length;
+                        const groupSize = self.groups()[i].participants().length;
                         if (groupSize > (participantCount - groupSize)) {
-                            if (!_sentGroupSizeWarning) {
-                                TOAST.warn('Some of the groups are too big and will result in some participants not getting to play :(');
-                                _sentGroupSizeWarning = true;
-                            }
+                            sendGroupSizeWarning = true;
+                            break;
                         }
                     }
-                    return true;
+
+                    if (sendGroupSizeWarning) {
+                        return Swal.fire({
+                            icon: 'warning',
+                            title: 'Are you sure?',
+                            html: `Some of the groups are too large and will likely result in some participants not getting to play 😢`,
+                            confirmButtonText: `Let's do it anyway!`,
+                            showCancelButton: true,
+                            cancelButtonText: 'No, wait&hellip;',
+                            showLoaderOnConfirm: true,
+                            customClass: {
+                                actions: 'justify-content-end'
+                            }
+                        }).then(result => !!result.value);
+                    }
+
+                    return Promise.resolve(true);
                 };
 
                 self.validateGroups = () => {
@@ -387,39 +404,42 @@
                 };
 
                 self.drawNames = (data, event) => {
-                    if (_validateParticipants()) {
-                        var postData = [];
-                        for (let i = 0; i < self.groups().length; ++i) {
-                            var groupParticipants = self.groups()[i].getParticipants();
-                            // the first group is the Individual Participants and they need to be split up
-                            if (i === 0) {
-                                for (let j = 0; j < groupParticipants.length; ++j) {
-                                    postData.push([groupParticipants[j]]);
+                    _validateParticipants()
+                        .then(valid => {
+                            if (!valid) return;
+
+                            var postData = [];
+                            for (let i = 0; i < self.groups().length; ++i) {
+                                var groupParticipants = self.groups()[i].getParticipants();
+                                // the first group is the Individual Participants and they need to be split up
+                                if (i === 0) {
+                                    for (let j = 0; j < groupParticipants.length; ++j) {
+                                        postData.push([groupParticipants[j]]);
+                                    }
+                                } else if (groupParticipants.length > 0) {
+                                    postData.push(groupParticipants);
                                 }
-                            } else if (groupParticipants.length > 0) {
-                                postData.push(groupParticipants);
                             }
-                        }
-                        var ajaxSettings = {
-                            type: 'POST',
-                            url: 'api/SecretSanta/DrawNames',
-                            dataType: 'json',
-                            contentType: 'application/json; charset=utf-8',
-                            data: JSON.stringify(postData),
-                        };
-                        loadingButtonAjax.call($(event.currentTarget), ajaxSettings)
-                            .then(data => data.map(x => {
-                                x.recipient = (x.recipient || { name: '<b class="text-danger">??</b>' });
-                                return x;
-                            }))
-                            .then((data) => {
-                                self.results(data);
-                                // scroll to the results section
-                                document.querySelector('#results').scrollIntoView({
-                                    behavior: 'smooth'
+                            var ajaxSettings = {
+                                type: 'POST',
+                                url: 'api/SecretSanta/DrawNames',
+                                dataType: 'json',
+                                contentType: 'application/json; charset=utf-8',
+                                data: JSON.stringify(postData),
+                            };
+                            loadingButtonAjax.call($(event.currentTarget), ajaxSettings)
+                                .then(data => data.map(x => {
+                                    x.recipient = (x.recipient || { name: '<b class="text-danger">??</b>' });
+                                    return x;
+                                }))
+                                .then((data) => {
+                                    self.results(data);
+                                    // scroll to the results section
+                                    document.querySelector('#results').scrollIntoView({
+                                        behavior: 'smooth'
+                                    });
                                 });
-                            });
-                    }
+                        });
                 };
             }
 
