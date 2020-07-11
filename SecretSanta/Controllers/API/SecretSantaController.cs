@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SecretSanta.Models;
 using System.Collections.Generic;
-using System.Web.Http.Description;
+using Microsoft.AspNetCore.Http;
 
 namespace SecretSanta.Controllers.API
 {
@@ -14,9 +14,8 @@ namespace SecretSanta.Controllers.API
         /// </summary>
         /// <returns>The names.</returns>
         /// <param name="participants">Participants.</param>
-        [HttpPost]
-        [Route("DrawNames")]
-        [ResponseType(typeof(List<Models.SecretSanta>))]
+        [HttpPost("DrawNames")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<Models.SecretSanta>))]
         public IActionResult DrawNames([FromBody]Participant[][] participants)
         {
             return Ok(Core.SecretSanta.DrawNames(participants));
