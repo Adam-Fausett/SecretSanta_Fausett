@@ -149,6 +149,20 @@
     <script src="https://cdn.jsdelivr.net/npm/uuid@latest/dist/umd/uuidv4.min.js"></script>
     <script type="text/javascript">
         (() => {
+            function showError(error) {
+                Swal.fire({
+                    title: 'Oh No!',
+                    html:
+                        `<div class="error-messages">
+                                <div class="col-12">
+                                    <p>${error.message}</p>
+                                </div>
+                            </div>`,
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+
             function getDefaultGroups() {
                 return [new Group(0, 'Individual Participants'), new Group(1, 'Group #1')];
             }
@@ -443,12 +457,12 @@
                             var minLoadingTime = 250;
                             var drawingStart = Date.now();
                             fetch('api/SecretSanta/DrawNames', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                    },
-                                    body: JSON.stringify(postData)
-                                })
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify(postData)
+                            })
                                 .then(res => res.ok ? res : Promise.reject(res.statusText))
                                 .then(res => res.json())
                                 .then(data => delayAsync(minLoadingTime - (Date.now() - drawingStart)).then(_ => data))
@@ -459,15 +473,12 @@
                                 .then((data) => {
                                     $(event.currentTarget).button('reset');
                                     self.results(data);
-                                    // scroll to the results section
-                                    document.querySelector('#results').scrollIntoView({
-                                        behavior: 'smooth'
-                                    });
 
-                                    Toast.fire({ icon: 'success', title: `🎁 Let the gift-giving begin! 🎄` });
+                                    // scroll to the results section
+                                    document.querySelector('#results').scrollIntoViewAsync({ behavior: 'smooth' })
+                                        .then(_ => Toast.fire({ icon: 'success', title: `🎁 Let the gift-giving begin! 🎄` }));
                                 })
-                                .catch(error => {
-                                });
+                                .catch(showError);
                         });
                 };
             }
