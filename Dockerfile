@@ -7,15 +7,22 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build
 WORKDIR /src
+COPY *.sln .
 COPY ["SecretSanta/SecretSanta.csproj", "SecretSanta/"]
 COPY ["SecretSanta.Core/SecretSanta.Core.csproj", "SecretSanta.Core/"]
 COPY ["SecretSanta.Models/SecretSanta.Models.csproj", "SecretSanta.Models/"]
-RUN dotnet restore "SecretSanta/SecretSanta.csproj"
+COPY ["SecretSanta.Tests/SecretSanta.Tests.csproj", "SecretSanta.Tests/"]
+RUN dotnet restore
 COPY . .
-WORKDIR "/src/SecretSanta"
-RUN dotnet build "SecretSanta.csproj" -c Release -o /app/build
 
+#testing
+FROM build as testing
+WORKDIR /src/SecretSanta.Tests
+RUN dotnet test
+
+#publish
 FROM build AS publish
+WORKDIR "/src/SecretSanta"
 RUN dotnet publish "SecretSanta.csproj" -c Release -o /app/publish
 
 FROM base AS final
