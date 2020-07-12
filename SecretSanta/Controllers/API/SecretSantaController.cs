@@ -12,7 +12,7 @@ namespace SecretSanta.Controllers.API
         /// <summary>
         /// Draws the names.
         /// </summary>
-        /// <returns>The names.</returns>
+        /// <returns></returns>
         /// <param name="participants">Participants.</param>
         [HttpPost("DrawNames")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<Models.SecretSanta>))]
