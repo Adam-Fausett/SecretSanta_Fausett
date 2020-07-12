@@ -107,7 +107,7 @@
     </div>
 </div>
 
-<div class="hide" data-bind="css: { hide: results().length === 0 }">
+<div class="hide" data-bind="css: { hide: selectedCollection().results().length === 0 }">
     <hr class="my-5" />
 
     <img class="logo img-fluid float-left mr-2" src="~/images/logo.png" style="max-width: 125px;" />
@@ -125,14 +125,14 @@
                 <th>Recipient</th>
             </tr>
         </thead>
-        <tbody data-bind="foreach: results">
+        <tbody data-bind="foreach: selectedCollection().results">
             <tr>
                 <td data-bind="text: name"></td>
                 <td data-bind="html: recipient.name"></td>
             </tr>
         </tbody>
         <tfoot>
-            <tr><td colspan="2"><span class="text-muted float-right" data-bind="text: results_timestamp_formatted()"></span></td></tr>
+            <tr><td colspan="2"><span class="text-muted float-right" data-bind="text: selectedCollection().results_timestamp_formatted()"></span></td></tr>
         </tfoot>
     </table>
 
@@ -171,7 +171,48 @@
             }
 
             function getDefaultCollections() {
-                return [{ id: 0, name: ko.observable('Collection #1'), groups: ko.observableArray(getDefaultGroups()) }];
+                return [new Collection(0, 'Collection #1', getDefaultGroups())];
+            }
+
+            function Collection(id, name, groups, results, results_timestamp) {
+                var self = this;
+                self.id = id;
+                self.name = ko.observable(name);
+                self.groups = ko.observableArray(groups);
+                
+                self.results = ko.observableArray(results || []);
+                self.results_timestamp = ko.observable(results_timestamp || null);
+                self.results_timestamp_formatted = ko.pureComputed(() => 
+                    self.results_timestamp() ? new Date(self.results_timestamp()).toLocaleString() : '');
+
+                self.save = (showToast = true) => {
+                    const flattenedCollection = {
+                        ...self,
+                        name: self.name(),
+                        groups: self.groups().map(g => ({
+                            ...g,
+                            name: g.name(),
+                            participants: g.participants().map(p => p())
+                        })),
+                        results: self.results(),
+                        results_timestamp: self.results_timestamp()
+                    };
+
+                    const idToUpdate = self.id;
+                    const collections = JSON.parse(localStorage['collections'] || '[]');
+                    const index = collections.findIndex(x => x.id === idToUpdate);
+
+                    if (index === -1) {
+                        collections.push(flattenedCollection);
+                    } else {
+                        collections[index] = flattenedCollection;
+                    }
+
+                    localStorage['collections'] = JSON.stringify(collections);
+                    if (showToast) Toast.fire({ icon: 'success', title: 'Collection saved! 🎉' });
+
+                    focusInput();
+                };
             }
 
             function Group(id, name, participants) {
@@ -203,7 +244,7 @@
                 var self = this;
 
                 const savedCollections = JSON.parse(localStorage['collections'] || '[]')
-                    .map(x => ({ ...x, name: ko.observable(x.name), groups: ko.observableArray(x.groups.map(g => new Group(g.id, g.name, g.participants))) }));
+                    .map(x => new Collection(x.id, x.name, x.groups.map(g => new Group(g.id, g.name, g.participants)), x.results, x.results_timestamp));
 
                 self.collections = ko.observableArray(
                     savedCollections.length > 0
@@ -245,10 +286,10 @@
                                 return false;
                             }
 
-                            self.collections.push({ id: uuidv4(), name: ko.observable(name), groups: ko.observableArray(getDefaultGroups()) });
+                            self.collections.push(new Collection(uuidv4(), name, getDefaultGroups()));
                             self.selectedCollection(self.collections()[self.collections().length - 1]);
                             setTimeout(focusInput, 250);
-                            self.saveCollection();
+                            self.selectedCollection().save();
                         }
                     });
                 };
@@ -285,38 +326,12 @@
                             }
 
                             currentCollection.name(name);
-                            self.saveCollection();
+                            currentCollection.save();
                         }
                     });
                 };
 
-                self.saveCollection = (showToast = true) => {
-                    const selectedCollection = self.selectedCollection();
-                    const flattenedCollection = {
-                        ...selectedCollection,
-                        name: selectedCollection.name(),
-                        groups: selectedCollection.groups().map(g => ({
-                            ...g,
-                            name: g.name(),
-                            participants: g.participants().map(p => p())
-                        }))
-                    };
-
-                    const idToUpdate = selectedCollection.id;
-                    const collections = JSON.parse(localStorage['collections'] || '[]');
-                    const index = collections.findIndex(x => x.id === idToUpdate);
-
-                    if (index === -1) {
-                        collections.push(flattenedCollection);
-                    } else {
-                        collections[index] = flattenedCollection;
-                    }
-
-                    localStorage['collections'] = JSON.stringify(collections);
-                    if (showToast) Toast.fire({ icon: 'success', title: 'Collection saved! 🎉' });
-
-                    focusInput();
-                };
+                self.saveCollection = () => self.selectedCollection().save();
 
                 self.deleteCollection = () => {
                     Swal.fire({
@@ -353,18 +368,13 @@
                             // ensure at-least one collection
                             if (self.collections().length === 0) {
                                 self.collections(getDefaultCollections());
-                                self.saveCollection(false);
+                                self.selectedCollection().save(false);
                             }
                         }
                     });
                 };
 
                 self.groups = ko.pureComputed(() => self.selectedCollection() ? self.selectedCollection().groups() : []);
-
-                self.results = ko.observableArray([]);
-                self.results_timestamp = ko.observable(null);
-                self.results_timestamp_formatted = ko.pureComputed(() => 
-                    self.results_timestamp() ? new Date(self.results_timestamp()).toLocaleString() : '');
 
                 self.addGroup = () => {
                     const collection = self.selectedCollection();
@@ -478,8 +488,11 @@
                                 }))
                                 .then((data) => {
                                     $(event.currentTarget).button('reset');
-                                    self.results(data);
-                                    self.results_timestamp(Date.now());
+
+                                    const selectedCollection = self.selectedCollection();
+                                    selectedCollection.results(data);
+                                    selectedCollection.results_timestamp(Date.now());
+                                    selectedCollection.save(false);
 
                                     // scroll to the results section
                                     document.querySelector('#results').scrollIntoViewAsync({ behavior: 'smooth' })
