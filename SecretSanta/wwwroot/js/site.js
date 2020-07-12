@@ -6,6 +6,25 @@ function delayAsync(ms) {
 }
 
 /**
+ * Show error messages in a nice message box.
+ * (requires sweetalert2)
+ * @param {any} error
+ */
+function showError(error) {
+    Swal.fire({
+        title: 'Oh No!',
+        html:
+            `<div class="error-messages">
+                    <div class="col-12">
+                        <p>${error.message}</p>
+                    </div>
+                </div>`,
+        icon: 'error',
+        confirmButtonText: 'OK'
+    });
+}
+
+/**
   * Extends Element Objects with a function named scrollIntoViewAsync
   *
   * @param {Object} scrollOptions - the normal scrollIntoView options

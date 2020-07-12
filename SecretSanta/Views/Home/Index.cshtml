@@ -154,20 +154,6 @@
     <script src="https://cdn.jsdelivr.net/npm/uuid@latest/dist/umd/uuidv4.min.js"></script>
     <script type="text/javascript">
         (() => {
-            function showError(error) {
-                Swal.fire({
-                    title: 'Oh No!',
-                    html:
-                        `<div class="error-messages">
-                                <div class="col-12">
-                                    <p>${error.message}</p>
-                                </div>
-                            </div>`,
-                    icon: 'error',
-                    confirmButtonText: 'OK'
-                });
-            }
-
             function getDefaultGroups() {
                 return [new Group(0, 'Individual Participants'), new Group(1, 'Group #1')];
             }
