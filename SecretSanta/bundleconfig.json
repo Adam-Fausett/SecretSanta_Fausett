@@ -15,6 +15,7 @@
       "wwwroot/js/knockout-3.5.0.js",
       "wwwroot/js/knockout-custombindings.js",
       "wwwroot/js/sweetalert.toast.mixin.js",
+      "wwwroot/js/uuidv4.min.js",
       "wwwroot/js/site.js"
     ],
     "minify": {
