@@ -111,6 +111,8 @@
     <hr class="my-5" />
 
     <img class="logo img-fluid float-left mr-2" src="~/images/logo.png" style="max-width: 125px;" />
+    <button type="button" class="btn btn-outline-danger float-right" title="clear results"
+        data-bind="click: selectedCollection().clearResults"><i class="fa fa-trash"></i></button>
     <h5>The results are in! 🎉</h5>
     <p>We got 'em all matched up! Check it out below to see who's paired with who.</p>
     <p>Go forth and be merry!</p>
@@ -212,6 +214,12 @@
                     if (showToast) Toast.fire({ icon: 'success', title: 'Collection saved! 🎉' });
 
                     focusInput();
+                };
+
+                self.clearResults = () => {
+                    self.results([]);
+                    self.results_timestamp(null);
+                    self.save(false);
                 };
             }
 
