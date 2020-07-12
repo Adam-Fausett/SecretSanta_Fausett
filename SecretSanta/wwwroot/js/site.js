@@ -15,10 +15,10 @@ function showError(error) {
         title: 'Oh No!',
         html:
             `<div class="error-messages">
-                    <div class="col-12">
-                        <p>${error.message}</p>
-                    </div>
-                </div>`,
+                <div class="col-12">
+                    <p>${error.message}</p>
+                </div>
+            </div>`,
         icon: 'error',
         confirmButtonText: 'OK'
     });
