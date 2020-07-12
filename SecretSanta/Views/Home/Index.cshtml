@@ -118,7 +118,7 @@
     <br />
 
     <table id="results" class="table table-bordered table-striped table-hover">
-        <caption>Secret Santas and their Recipients! <span data-bind="text: results_timestamp_formatted()"></span></caption>
+        <caption>Secret Santas and their Recipients!</caption>
         <thead>
             <tr>
                 <th>Santa</th>
@@ -131,6 +131,9 @@
                 <td data-bind="html: recipient.name"></td>
             </tr>
         </tbody>
+        <tfoot>
+            <tr><td colspan="2"><span class="text-muted float-right" data-bind="text: results_timestamp_formatted()"></span></td></tr>
+        </tfoot>
     </table>
 
     <div class="bd-callout bd-callout-warning">
@@ -361,7 +364,7 @@
                 self.results = ko.observableArray([]);
                 self.results_timestamp = ko.observable(null);
                 self.results_timestamp_formatted = ko.pureComputed(() => 
-                    self.results_timestamp() ? `(${new Date(self.results_timestamp()).toLocaleString()})` : '(unknown)');
+                    self.results_timestamp() ? new Date(self.results_timestamp()).toLocaleString() : '');
 
                 self.addGroup = () => {
                     const collection = self.selectedCollection();
