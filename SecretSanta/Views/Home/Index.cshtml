@@ -118,7 +118,7 @@
     <br />
 
     <table id="results" class="table table-bordered table-striped table-hover">
-        <caption>Secret Santas and their Recipients!</caption>
+        <caption>Secret Santas and their Recipients! <span data-bind="text: results_timestamp_formatted()"></span></caption>
         <thead>
             <tr>
                 <th>Santa</th>
@@ -359,6 +359,9 @@
                 self.groups = ko.pureComputed(() => self.selectedCollection() ? self.selectedCollection().groups() : []);
 
                 self.results = ko.observableArray([]);
+                self.results_timestamp = ko.observable(null);
+                self.results_timestamp_formatted = ko.pureComputed(() => 
+                    self.results_timestamp() ? `(${new Date(self.results_timestamp()).toLocaleString()})` : '(unknown)');
 
                 self.addGroup = () => {
                     const collection = self.selectedCollection();
@@ -473,6 +476,7 @@
                                 .then((data) => {
                                     $(event.currentTarget).button('reset');
                                     self.results(data);
+                                    self.results_timestamp(Date.now());
 
                                     // scroll to the results section
                                     document.querySelector('#results').scrollIntoViewAsync({ behavior: 'smooth' })
