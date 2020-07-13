@@ -30,4 +30,5 @@ WORKDIR /app
 COPY --from=publish /app/publish .
 # ENTRYPOINT ["dotnet", "SecretSanta.dll"]
 # heroku uses the following
+CMD ASPNETCORE_HTTPS_PORT=$PORT
 CMD ASPNETCORE_URLS=http://*:$PORT dotnet SecretSanta.dll
