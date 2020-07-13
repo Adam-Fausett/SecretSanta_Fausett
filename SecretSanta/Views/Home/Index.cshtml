@@ -108,7 +108,7 @@
     </div>
 </div>
 
-<div class="hide" data-bind="css: { hide: results().rows.length === 0 }">
+<div id="results" class="hide" data-bind="css: { hide: results().rows.length === 0 }">
     <hr class="my-5" />
 
     <img class="logo img-fluid float-left mr-2" src="~/images/logo.png" style="max-width: 125px;" />
@@ -120,7 +120,7 @@
 
     <br />
 
-    <table id="results" class="table table-bordered table-striped table-hover">
+    <table class="table table-bordered table-striped table-hover">
         <caption>Secret Santas and their Recipients!</caption>
         <thead>
             <tr>
@@ -501,7 +501,9 @@
                                     selectedCollection.save();
 
                                     // scroll to the results section
-                                    document.querySelector('#results').scrollIntoViewAsync({ behavior: 'smooth' })
+                                    const resultsElement = document.querySelector('#results');
+                                    const intersectMargin = Math.max(resultsElement.offsetHeight - window.innerHeight, 0);
+                                    resultsElement.scrollIntoViewAsync({ behavior: 'smooth' }, { rootMargin: `0px 0px ${intersectMargin}px 0px` })
                                         .then(_ => Toast.fire({ icon: 'success', title: `🎁 Let the gift-giving begin! 🎄` }));
                                 })
                                 .catch(showError);
