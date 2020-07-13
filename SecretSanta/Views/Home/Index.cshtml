@@ -503,7 +503,7 @@
                                     // scroll to the results section
                                     const resultsElement = document.querySelector('#results');
                                     const intersectMargin = Math.max(resultsElement.offsetHeight - window.innerHeight, 0);
-                                    resultsElement.scrollIntoViewAsync({ behavior: 'smooth' }, { rootMargin: `0px 0px ${intersectMargin}px 0px` })
+                                    resultsElement.scrollIntoViewAsync({ behavior: 'smooth' }, { rootMargin: `0px 0px ${intersectMargin + 15}px 0px` })
                                         .then(_ => Toast.fire({ icon: 'success', title: `🎁 Let the gift-giving begin! 🎄` }));
                                 })
                                 .catch(showError);
