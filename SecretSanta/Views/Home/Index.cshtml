@@ -155,7 +155,7 @@
 @section scripts {
     <script type="text/javascript">
         (() => {
-            $(() => { ko.applyBindings(new SecretSantaViewModel()); ko.tasks.schedule(focusInput); });
+            $(() => { ko.applyBindings(new SecretSantaViewModel()); if (!isMobileDevice()) ko.tasks.schedule(focusInput); });
 
             const _collectionsStorageKey = 'collections';
 

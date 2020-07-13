@@ -24,6 +24,10 @@ function showError(error) {
     });
 }
 
+function isMobileDevice() {
+    return navigator.userAgent.match(/Mobi/);
+};
+
 /**
   * Extends Element Objects with a function named scrollIntoViewAsync
   *
