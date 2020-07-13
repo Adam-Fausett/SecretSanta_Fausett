@@ -17,6 +17,7 @@
         <div class="col">
             <p class="clear text-center">
                 <button id="btnDrawNames" type="button" tabindex="-1" class="btn btn-danger" style="margin-left: -0.75em;"
+                        onclick="this.blur()"
                         data-loading-text="<i class='spinner-border spinner-border-sm'></i>&nbsp; Drawing&hellip;"
                         data-success-text="Let the gift-giving begin! <span class='fa fa-gift'></span> <span class='glyphicon glyphicon-gift'></span>"
                         data-bind="click: drawNames">
@@ -41,7 +42,7 @@
                     </button>
                 </div>
                 <select class="custom-select" tabindex="-1" onchange="this.blur()"
-                        data-bind="options: collections, optionsText: 'name', value: selectedCollection, event: { change: () => focusInput() }">
+                        data-bind="options: collections, optionsText: 'name', value: selectedCollection">
                 </select>
                 <div class="input-group-append">
                     <button type="button" class="btn btn-outline-secondary" tabindex="-1"
@@ -107,7 +108,7 @@
     </div>
 </div>
 
-<div class="hide" data-bind="css: { hide: selectedCollection().results().length === 0 }">
+<div class="hide" data-bind="css: { hide: results().rows.length === 0 }">
     <hr class="my-5" />
 
     <img class="logo img-fluid float-left mr-2" src="~/images/logo.png" style="max-width: 125px;" />
@@ -127,14 +128,14 @@
                 <th>Recipient</th>
             </tr>
         </thead>
-        <tbody data-bind="foreach: selectedCollection().results">
+        <tbody data-bind="foreach: results().rows">
             <tr>
                 <td data-bind="text: name"></td>
                 <td data-bind="html: recipient.name"></td>
             </tr>
         </tbody>
         <tfoot>
-            <tr><td colspan="2"><span class="text-muted float-right" data-bind="text: selectedCollection().results_timestamp_formatted()"></span></td></tr>
+            <tr><td colspan="2"><span class="text-muted float-right" data-bind="text: results().timestamp"></span></td></tr>
         </tfoot>
     </table>
 
@@ -142,6 +143,7 @@
         <p>
             If you don't like the way the way it all shook out, feel free to
             <button type="button" class="btn btn-outline-primary box-shadow"
+                    onclick="this.blur()"
                     data-loading-text="<i class='spinner-border spinner-border-sm'></i>&nbsp; Drawing&hellip;"
                     data-bind="click: drawNames">
                 draw again 👍
@@ -153,41 +155,37 @@
 @section scripts {
     <script type="text/javascript">
         (() => {
-            function getDefaultGroups() {
-                return [new Group(0, 'Individual Participants'), new Group(1, 'Group #1')];
-            }
+            $(() => { ko.applyBindings(new SecretSantaViewModel()); ko.tasks.schedule(focusInput); });
 
-            function getDefaultCollections() {
-                return [new Collection(0, 'Collection #1', getDefaultGroups())];
-            }
+            const _collectionsStorageKey = 'collections';
 
-            function Collection(id, name, groups, results, results_timestamp) {
-                var self = this;
-                self.id = id;
-                self.name = ko.observable(name);
-                self.groups = ko.observableArray(groups);
-                
-                self.results = ko.observableArray(results || []);
-                self.results_timestamp = ko.observable(results_timestamp || null);
-                self.results_timestamp_formatted = ko.pureComputed(() => 
-                    self.results_timestamp() ? new Date(self.results_timestamp()).toLocaleString() : '');
+            class Collection {
+                constructor(id, name, groups, results, results_timestamp) {
+                    var self = this;
+                    self.id = id;
+                    self.name = ko.observable(name);
+                    self.groups = ko.observableArray(groups);
+                    self.results = ko.observableArray(results || []);
+                    self.results_timestamp = ko.observable(results_timestamp || null);
+                    self.results_timestamp_formatted = ko.pureComputed(() => 
+                        self.results_timestamp() ? new Date(self.results_timestamp()).toLocaleString() : '');
+                }
 
-                self.save = (showToast = true) => {
+                save() {
                     const flattenedCollection = {
-                        ...self,
-                        name: self.name(),
-                        groups: self.groups().map(g => ({
+                        ...this,
+                        name: this.name(),
+                        groups: this.groups().map(g => ({
                             ...g,
                             name: g.name(),
                             participants: g.participants().map(p => p())
                         })),
-                        results: self.results(),
-                        results_timestamp: self.results_timestamp()
+                        results: this.results(),
+                        results_timestamp: this.results_timestamp()
                     };
 
-                    const idToUpdate = self.id;
-                    const collections = JSON.parse(localStorage['collections'] || '[]');
-                    const index = collections.findIndex(x => x.id === idToUpdate);
+                    const collections = JSON.parse(localStorage[_collectionsStorageKey] || '[]');
+                    const index = collections.findIndex(x => x.id === this.id);
 
                     if (index === -1) {
                         collections.push(flattenedCollection);
@@ -195,58 +193,93 @@
                         collections[index] = flattenedCollection;
                     }
 
-                    localStorage['collections'] = JSON.stringify(collections);
-                    if (showToast) Toast.fire({ icon: 'success', title: 'Collection saved! 🎉' });
-
-                    focusInput();
+                    localStorage.setItem(_collectionsStorageKey, JSON.stringify(collections));
                 };
 
-                self.clearResults = () => {
-                    self.results([]);
-                    self.results_timestamp(null);
-                    self.save(false);
+                delete() {
+                    const filteredCollections = JSON.parse(localStorage[_collectionsStorageKey] || '[]')
+                        .filter(x => x.id != this.id);
+                    
+                    localStorage.setItem(_collectionsStorageKey, JSON.stringify(filteredCollections));
                 };
+
+                clearResults = () => {
+                    this.results([]);
+                    this.results_timestamp(null);
+                    this.save();
+                };
+
+                get participantCount() {
+                    return this.groups().reduce((total, group, test) => { return total + group.participantCount; }, 0);
+                }
+
+                static defaultCollections() {
+                    return [new Collection(uuidv4(), 'Collection #1', Group.defaultGroups())];
+                }
+
+                static loadCollections() {
+                    return JSON.parse(localStorage[_collectionsStorageKey] || '[]')
+                        .map(x => new Collection(x.id, x.name, x.groups.map(g => new Group(g.id, g.name, g.participants)), x.results, x.results_timestamp));
+                }
             }
 
-            function Group(id, name, participants) {
-                var self = this;
-                self.id = id;
-                self.name = ko.observable(name || 'Unknown');
-                self.warningMessage = ko.observable('');
-                self.participants = ko.observableArray((participants || []).map(x => ko.observable(x)));
-                self.newParticipantName = ko.observable('');
+            class Group {
+                constructor(id, name, participants) {
+                    var self = this;
+                    self.id = id;
+                    self.name = ko.observable(name || 'Unknown');
+                    self.warningMessage = ko.observable('');
+                    self.participants = ko.observableArray((participants || []).map(x => ko.observable(x)));
+                    self.newParticipantName = ko.observable('');
+                }
 
-                self.addParticipant = () => {
-                    if (self.newParticipantName()) {
-                        self.participants.push(ko.observable(self.newParticipantName()));
-                        self.newParticipantName('');
+                addParticipant() {
+                    if (this.newParticipantName()) {
+                        this.participants.push(ko.observable(this.newParticipantName()));
+                        this.newParticipantName('');
                     }
-                    focusInput(self.id);
+                    focusInput(this.id);
                 };
 
-                self.removeParticipant = (indexToRemove) => {
-                    self.participants.splice(indexToRemove, 1);
+                removeParticipant(indexToRemove) {
+                    this.participants.splice(indexToRemove, 1);
                 };
 
-                self.getParticipants = () => {
-                    return self.participants().map((participant) => { return { name: participant() }; });
+                getParticipants() {
+                    return this.participants().map((participant) => ({ name: participant() }));
                 };
+
+                get participantCount() {
+                    return this.participants().length;
+                }
+
+                static defaultGroups() {
+                    return [new Group(uuidv4(), 'Individual Participants'), new Group(uuidv4(), 'Group #1')];
+                }
             }
 
-            function SecretSantaViewModel() {
-                var self = this;
+            class SecretSantaViewModel {
+                constructor() {
+                    var self = this;
+                    const savedCollections = Collection.loadCollections();
+                    self.collections = ko.observableArray(
+                        savedCollections.length > 0
+                        ? savedCollections
+                        : Collection.defaultCollections());
+                    self.selectedCollection = ko.observable(self.collections()[0]);
+                    self.groups = ko.pureComputed(() => self.selectedCollection() ? self.selectedCollection().groups() : []);
+                    self.validateGroups();
+                    self.results = ko.pureComputed(() => self.selectedCollection() 
+                        ? { rows: self.selectedCollection().results(), timestamp: self.selectedCollection().results_timestamp_formatted() } 
+                        : { rows: [] });
+                }
 
-                const savedCollections = JSON.parse(localStorage['collections'] || '[]')
-                    .map(x => new Collection(x.id, x.name, x.groups.map(g => new Group(g.id, g.name, g.participants)), x.results, x.results_timestamp));
+                saveCollection() {
+                    this.selectedCollection().save();
+                    Toast.fire({ icon: 'success', title: 'Collection saved! 🎉' });
+                }
 
-                self.collections = ko.observableArray(
-                    savedCollections.length > 0
-                    ? savedCollections
-                    : getDefaultCollections());
-
-                self.selectedCollection = ko.observable(self.collections()[0]);
-
-                self.addCollection = () => {
+                addCollection() {
                     Swal.fire({
                         title: 'Add a new collection',
                         html:
@@ -279,16 +312,19 @@
                                 return false;
                             }
 
-                            self.collections.push(new Collection(uuidv4(), name, getDefaultGroups()));
-                            self.selectedCollection(self.collections()[self.collections().length - 1]);
+                            this.collections.push(new Collection(uuidv4(), name, Group.defaultGroups()));
+                            this.selectedCollection(this.collections()[this.collections().length - 1]);
+                            this.selectedCollection().save();
+
+                            Toast.fire({ icon: 'success', title: 'Collection added! 😎' });
+
                             setTimeout(focusInput, 250);
-                            self.selectedCollection().save();
                         }
                     });
                 };
 
-                self.editCollection = () => {
-                    const currentCollection = self.selectedCollection();
+                editCollection() {
+                    const selectedCollection = this.selectedCollection();
                     Swal.fire({
                         title: 'Edit collection',
                         html:
@@ -297,7 +333,7 @@
                                 <div class="form-group row">
                                     <label for="swal-form-name" class="col-sm-3 col-form-label">Name:</label>
                                     <div class="col-sm-9">
-                                        <input id="swal-form-name" type="text" class="form-control" placeholder="Name" aria-label="Trigger" value="${currentCollection.name()}" required>
+                                        <input id="swal-form-name" type="text" class="form-control" placeholder="Name" aria-label="Trigger" value="${selectedCollection.name()}" required>
                                     </div>
                                 </div>
                             </div>`,
@@ -318,22 +354,21 @@
                                 return false;
                             }
 
-                            currentCollection.name(name);
-                            currentCollection.save();
+                            selectedCollection.name(name);
+                            this.saveCollection();
                         }
                     });
                 };
 
-                self.saveCollection = () => self.selectedCollection().save();
-
-                self.deleteCollection = () => {
+                deleteCollection() {
+                    const selectedCollection = this.selectedCollection();
                     Swal.fire({
                         icon: 'warning',
                         title: 'Are you sure?',
                         html:
                             `<hr/>
                             <div class="bs-callout bs-callout-danger text-left">
-                                This action will permanantly wipe the <code>${self.selectedCollection().name()}</code> collection
+                                This action will permanantly wipe the <code>${selectedCollection.name()}</code> collection
                             </div>`,
                         focusConfirm: false,
                         confirmButtonText: '🔥 Burn it with fire!',
@@ -345,73 +380,72 @@
                             actions: 'justify-content-end'
                         },
                         preConfirm: () => {
-                            const idToRemove = self.selectedCollection().id;
+                            selectedCollection.delete();
 
-                            // filter out of localStorage
-                            const updatedCollections = JSON.parse(localStorage['collections'] || '[]')
-                                .filter(x => x.id != idToRemove);
-                            localStorage['collections'] = JSON.stringify(updatedCollections);
-
-                            // filter out of in memory collections
-                            self.collections(self.collections().filter(x => {
-                                if (x.id != idToRemove) return true;
+                            // filter deleted item out of in-memory collections
+                            this.collections(this.collections().filter(x => {
+                                if (x.id != selectedCollection.id) return true;
                                 Toast.fire({ icon: 'error', title: `Deleted collection: &nbsp;<b>${x.name()}</b>` });
                             }));
 
                             // ensure at-least one collection
-                            if (self.collections().length === 0) {
-                                self.collections(getDefaultCollections());
-                                self.selectedCollection().save(false);
+                            if (this.collections().length === 0) {
+                                this.collections(Collection.defaultCollections());
+                                this.selectedCollection(this.collections[0]);
                             }
                         }
                     });
                 };
 
-                self.groups = ko.pureComputed(() => self.selectedCollection() ? self.selectedCollection().groups() : []);
-
-                self.addGroup = () => {
-                    const collection = self.selectedCollection();
+                addGroup() {
+                    const collection = this.selectedCollection();
                     collection.groups.push(new Group(uuidv4(), `Group #${collection.groups().length}`));
                     $('[autofocus]:last').focus();
                 };
 
-                self.removeGroup = (indexToRemove) => {
-                    self.selectedCollection().groups.splice(indexToRemove, 1);
-                    self.validateGroups();
+                removeGroup(indexToRemove) {
+                    this.selectedCollection().groups.splice(indexToRemove, 1);
+                    this.validateGroups();
                 };
 
-                let _validateParticipants = async () => {
-                    let participantCount = self.groups().reduce((total, group, test) => { return total + group.getParticipants().length; }, 0);
+                validateGroups() {
+                    const totalParticipants = this.selectedCollection().participantCount;
+                    Array.from(this.groups().slice(1)).forEach((group) => {
+                        const groupSize = group.participantCount;
+                        const warningMessage = (groupSize > (totalParticipants - groupSize)) 
+                            ? 'This group is a bit too large - consider breaking it up&hellip;<br /><center><span class="text-muted">(everyone may not get to play)</span></center>'
+                            : (groupSize == 1)
+                                ? 'Groups should have <i>at least</i> <b>2</b> members to be effective&hellip;'
+                                : '';
+                        group.warningMessage(warningMessage);
+                    })
+                };
+
+                async _validateParticipants() {
+                    const totalParticipants = this.selectedCollection().participantCount;
+
                     // must have participants to draw names
-                    if (participantCount === 0) {
-                        Swal.fire({
+                    if (totalParticipants === 0) {
+                        return Swal.fire({
                             icon: 'warning',
                             title: 'Whoa! Hold on there&hellip;',
                             html: '<hr />You\'re gonna have to add some people first!',
-                        });
-                        return Promise.resolve(false);
+                        }).then(_ => Promise.resolve(false));
                     }
+
                     // must have more than one participant to draw names
-                    if (participantCount === 1) {
-                        Swal.fire({
+                    if (totalParticipants === 1) {
+                        return Swal.fire({
                             icon: 'error',
                             title: 'Hate to tell you this, but&hellip;',
                             html: '<hr />Unfortunately, <b>1</b> person just isn\'t a party&hellip;<br />You\'re gonna have to add some more people!',
-                        });
-                        return Promise.resolve(false);
+                        }).then(_ => Promise.resolve(false));
                     }
 
+                    const invalidGroupSize = Array.from(this.groups().slice(1))
+                        .some(group => group.participantCount > (totalParticipants - group.participantCount));
 
-                    let shouldSendGroupSizeWarning = false;
-                    for (let i = 1; i < self.groups().length; ++i) {
-                        const groupSize = self.groups()[i].participants().length;
-                        if (groupSize > (participantCount - groupSize)) {
-                            shouldSendGroupSizeWarning = true;
-                            break;
-                        }
-                    }
-
-                    if (shouldSendGroupSizeWarning) {
+                    if (invalidGroupSize) {
                         return Swal.fire({
                             icon: 'warning',
                             title: 'Are you sure?',
@@ -419,7 +453,6 @@
                             confirmButtonText: `Let's do it anyway!`,
                             showCancelButton: true,
                             cancelButtonText: 'No, wait&hellip;',
-                            showLoaderOnConfirm: true,
                             customClass: {
                                 actions: 'justify-content-end'
                             }
@@ -429,37 +462,20 @@
                     return Promise.resolve(true);
                 };
 
-                self.validateGroups = () => {
-                    let participantCount = self.groups().reduce((total, group, test) => { return total + group.getParticipants().length; }, 0);
-                    for (let i = 1; i < self.groups().length; ++i) {
-                        let groupSize = self.groups()[i].participants().length;
-                        if (groupSize > (participantCount - groupSize)) {
-                            self.groups()[i].warningMessage('This group is a bit too large - consider breaking it up&hellip;<br /><center><span class="text-muted">(everyone may not get to play)</span></center>');
-                        } else if (groupSize == 1) {
-                            self.groups()[i].warningMessage('Groups should have <i>at least</i> <b>2</b> members to be effective&hellip;');
-                        } else {
-                            self.groups()[i].warningMessage('');
-                        }
-                    }
-                };
-
-                self.drawNames = (data, event) => {
-                    _validateParticipants()
+                drawNames = (data, event) => {
+                    this._validateParticipants()
                         .then(valid => {
                             if (!valid) return;
 
                             var postData = [];
-                            for (let i = 0; i < self.groups().length; ++i) {
-                                var groupParticipants = self.groups()[i].getParticipants();
-                                // the first group is the Individual Participants and they need to be split up
-                                if (i === 0) {
-                                    for (let j = 0; j < groupParticipants.length; ++j) {
-                                        postData.push([groupParticipants[j]]);
-                                    }
+                            this.groups().forEach((group, i) => {
+                                const groupParticipants = group.getParticipants();
+                                if (i === 0) { // the first group is the Individual Participants and they need to be split up
+                                    groupParticipants.forEach(participant => postData.push([participant]))
                                 } else if (groupParticipants.length > 0) {
                                     postData.push(groupParticipants);
                                 }
-                            }
+                            });
 
                             $(event.currentTarget).button('loading');
                             var minLoadingTime = 250;
@@ -475,17 +491,14 @@
                                 .then(res => res.ok ? res : Promise.reject(res.statusText))
                                 .then(res => res.json())
                                 .then(data => delayAsync(minLoadingTime - (Date.now() - drawingStart)).then(_ => data))
-                                .then(data => data.map(x => {
-                                    x.recipient = (x.recipient || { name: '<b class="text-danger">??</b>' });
-                                    return x;
-                                }))
+                                .then(data => data.map(x => ({ ...x, recipient: x.recipient || { name: '<b class="text-danger">??</b>' } })))
                                 .then((data) => {
                                     $(event.currentTarget).button('reset');
 
-                                    const selectedCollection = self.selectedCollection();
+                                    const selectedCollection = this.selectedCollection();
                                     selectedCollection.results(data);
                                     selectedCollection.results_timestamp(Date.now());
-                                    selectedCollection.save(false);
+                                    selectedCollection.save();
 
                                     // scroll to the results section
                                     document.querySelector('#results').scrollIntoViewAsync({ behavior: 'smooth' })
@@ -496,13 +509,11 @@
                 };
             }
 
-            ko.applyBindings(new SecretSantaViewModel());
-
-            focusInput();
+            function focusInput(groupId) {
+                groupId
+                    ? $(`[data-group=${groupId}] [autofocus]:last`).focus()
+                    : $(`[data-group]:first [autofocus]:last`).focus();
+            }
         })();
-
-        function focusInput(groupId = 0) {
-            $(`[data-group=${groupId}] [autofocus]:last`).focus();
-        }
     </script>
 }
