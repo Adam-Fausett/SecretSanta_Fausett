@@ -27,6 +27,16 @@ namespace SecretSanta
             else
             {
                 services.AddControllersWithViews();
+
+                services.AddHttpsRedirection(options => { options.HttpsPort = 443; });
+            
+                services.Configure<ForwardedHeadersOptions>(options =>
+                {
+                    options.KnownNetworks.Clear();
+                    options.KnownProxies.Clear();
+                    options.ForwardedHeaders =
+                        Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto;
+                });
             }
         }
 
@@ -42,8 +52,12 @@ namespace SecretSanta
                 app.UseExceptionHandler("/Home/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
+
+                app.UseForwardedHeaders();
             }
+
             app.UseHttpsRedirection();
+
             app.UseStaticFiles();
 
             app.UseRouting();
